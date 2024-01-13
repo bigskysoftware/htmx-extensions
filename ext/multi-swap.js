@@ -14,7 +14,7 @@
         var selectorToSwapStyle = {}
         var elements = swapStyle.replace(/^multi\s*:\s*/, '').split(/\s*,\s*/)
 
-        elements.map(function(element) {
+        elements.forEach(function(element) {
           var split = element.split(/\s*:\s*/)
           var elementSelector = split[0]
           var elementSwapStyle = typeof (split[1]) !== 'undefined' ? split[1] : 'innerHTML'

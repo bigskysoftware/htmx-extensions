@@ -1,4 +1,4 @@
-(function(undefined) {
+(function() {
   'use strict'
 
   // Save a reference to the global object (window in the browser)
