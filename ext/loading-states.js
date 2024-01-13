@@ -24,7 +24,7 @@
     const delayElt = htmx.closest(sourceElt, '[data-loading-delay]')
     if (delayElt) {
       const delayInMilliseconds =
-				delayElt.getAttribute('data-loading-delay') || 200
+        delayElt.getAttribute('data-loading-delay') || 200
       const timeout = setTimeout(function() {
         doCallback()
 
@@ -89,8 +89,8 @@
               targetElt,
               function() {
                 targetElt.style.display =
-									sourceElt.getAttribute('data-loading') ||
-									'inline-block'
+                  sourceElt.getAttribute('data-loading') ||
+                  'inline-block'
               },
               function() { targetElt.style.display = 'none' }
             )

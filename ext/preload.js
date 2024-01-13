@@ -117,7 +117,7 @@ htmx.defineExtension('preload', {
           break
 
         case 'mousedown':
-					 // Mirror `touchstart` events (fires immediately)
+          // Mirror `touchstart` events (fires immediately)
           node.addEventListener('touchstart', load(node))
           break
       }
