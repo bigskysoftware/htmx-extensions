@@ -8,7 +8,7 @@ htmx.defineExtension('client-side-templates', {
       if (template) {
         return Mustache.render(template.innerHTML, data)
       } else {
-        throw 'Unknown mustache template: ' + templateId
+        throw new Error('Unknown mustache template: ' + templateId)
       }
     }
 
@@ -20,7 +20,7 @@ htmx.defineExtension('client-side-templates', {
       if (template) {
         return Mustache.render(template.innerHTML, { data })
       } else {
-        throw 'Unknown mustache template: ' + templateId
+        throw new Error('Unknown mustache template: ' + templateId)
       }
     }
 
@@ -33,7 +33,7 @@ htmx.defineExtension('client-side-templates', {
       if (renderTemplate) {
         return renderTemplate(data)
       } else {
-        throw 'Unknown handlebars template: ' + templateId
+        throw new Error('Unknown handlebars template: ' + templateId)
       }
     }
 
@@ -46,7 +46,7 @@ htmx.defineExtension('client-side-templates', {
       if (renderTemplate) {
         return renderTemplate(data)
       } else {
-        throw 'Unknown handlebars template: ' + templateId
+        throw new Error('Unknown handlebars template: ' + templateId)
       }
     }
 
@@ -76,7 +76,7 @@ htmx.defineExtension('client-side-templates', {
         var frag = processor.transformToFragment(data, document)
         return new XMLSerializer().serializeToString(frag)
       } else {
-        throw 'Unknown XSLT template: ' + templateId
+        throw new Error('Unknown XSLT template: ' + templateId)
       }
     }
 

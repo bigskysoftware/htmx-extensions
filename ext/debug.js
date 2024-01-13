@@ -5,7 +5,7 @@ htmx.defineExtension('debug', {
     } else if (console) {
       console.log('DEBUG:', name, evt)
     } else {
-      throw 'NO CONSOLE SUPPORTED'
+      throw new Error('NO CONSOLE SUPPORTED')
     }
   }
 })
