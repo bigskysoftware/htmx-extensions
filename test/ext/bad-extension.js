@@ -1,10 +1,10 @@
 describe('bad extension', function() {
   htmx.defineExtension('bad-extension', {
-    onEvent: function(name, evt) { throw 'onEvent' },
-    transformResponse: function(text, xhr, elt) { throw 'transformRequest' },
-    isInlineSwap: function(swapStyle) { throw 'isInlineSwap' },
-    handleSwap: function(swapStyle, target, fragment, settleInfo) { throw 'handleSwap' },
-    encodeParameters: function(xhr, parameters, elt) { throw 'encodeParameters' }
+    onEvent: function(name, evt) { throw new Error('onEvent') },
+    transformResponse: function(text, xhr, elt) { throw new Error('transformRequest') },
+    isInlineSwap: function(swapStyle) { throw new Error('isInlineSwap') },
+    handleSwap: function(swapStyle, target, fragment, settleInfo) { throw new Error('handleSwap') },
+    encodeParameters: function(xhr, parameters, elt) { throw new Error('encodeParameters') }
   }
   )
   beforeEach(function() {
