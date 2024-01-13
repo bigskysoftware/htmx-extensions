@@ -114,6 +114,8 @@ describe('json-enc extension', function() {
   })
 
   it('handles delete with form parameters', function() {
+    const defaults = htmx.config.methodsThatUseUrlParams
+    htmx.config.methodsThatUseUrlParams = ['get']
     this.server.respondWith('DELETE', '/test', function(xhr) {
       var values = JSON.parse(xhr.requestBody)
       values.should.have.keys('username', 'password')
@@ -131,5 +133,6 @@ describe('json-enc extension', function() {
     byId('btnSubmit').click()
     this.server.respond()
     this.server.lastRequest.response.should.equal('{"passwordok":true}')
+    htmx.config.methodsThatUseUrlParams = defaults
   })
 })
