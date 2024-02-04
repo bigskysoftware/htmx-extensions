@@ -25,7 +25,7 @@ describe('path-params extension', function() {
     })
     var div = make("<div hx-ext='path-params' hx-get='/items/{itemId}' hx-vals='{\"itemId\":42, \"other\":43}'></div>")
     div.click()
-    should.equal(request.detail.requestConfig.parameters.other, 43)
+    should.equal(request.detail.requestConfig.parameters.other, '43')
     should.equal(request.detail.requestConfig.parameters.itemId, undefined)
   })
 
