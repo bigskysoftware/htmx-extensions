@@ -49,7 +49,7 @@ describe('method-override extension', function() {
 
   it('issues a GET request with proper headers', function() {
     this.server.respondWith('GET', '/test', function(xhr) {
-      should.not.exist(xhr.requestHeaders['X-HTTP-Method-Override']);
+      should.not.exist(xhr.requestHeaders['X-HTTP-Method-Override'])
       xhr.method.should.equal('GET')
       xhr.respond(200, {}, 'Getted!')
     })
@@ -62,7 +62,7 @@ describe('method-override extension', function() {
 
   it('issues a POST request with proper headers', function() {
     this.server.respondWith('POST', '/test', function(xhr) {
-      should.not.exist(xhr.requestHeaders['X-HTTP-Method-Override']);
+      should.not.exist(xhr.requestHeaders['X-HTTP-Method-Override'])
       xhr.method.should.equal('POST')
       xhr.respond(200, {}, 'Posted!')
     })
