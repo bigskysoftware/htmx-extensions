@@ -8,7 +8,6 @@
       htmx.config.scrollBehavior = 'smooth'
       htmx.config.methodsThatUseUrlParams = ['get']
       htmx.config.selfRequestsOnly = false
-      htmx.config.head.boost = 'none'
 
       if (!htmx.createEventSource) {
         htmx.createEventSource = createEventSource
