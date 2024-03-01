@@ -13,19 +13,26 @@
 
         input[type=search] {
             width: 100%;
-            padding 2px;
+            padding: 2px;
             border: 1px solid darkgray;
             border-radius: 4px;
             background-color: whitesmoke;
             height: 2.5em;
             box-shadow: inset 1px 1px lightgray;
+            margin-bottom: 12px;
         }
+
         main {
             padding: 16px;
             margin: 16px;
         }
 
         p {
+            margin: 16px;
+            line-height: 1.8em;
+        }
+
+        details {
             margin: 16px;
             line-height: 1.8em;
         }
@@ -39,10 +46,18 @@
 </head>
 <body>
 <main>
-    <h1>&lt;/> htmx extensions</h1>
-    <p>This site is a searchable collection of extensions for <a href="https://htmx.org">htmx.org</a></p>
-    <h2>Core</h2>
-    <p>These are the core extensions for htmx supported by the htmx team.</p>
+    <h1>&lt;/> - extensions.htmx.org</h1>
+
+    <p>This site is a searchable collection of extensions for <a href="https://htmx.org">htmx.org</a>.
+        <a href="#core">Core</a> extensions are actively maintained by the htmx team.</p>
+
+    <details>
+        <summary>Contributing</summary>
+        If you'd like to add your extension to this website, add a row to the table below in a PR agains the
+        <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/www/index.html"><code>/www/index.html</code></a> file.
+    </details>
+
+    <h2 id="core"><a href="#core">Core</a></h2>
     <input placeholder="search core extensions"
            type="search"
            _="on input
@@ -63,7 +78,8 @@
             </td>
             <td>
                 Provides support for
-                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events">Server Sent Events</a>
+                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events">Server
+                    Sent Events</a>
                 directly from HTML.
             </td>
         </tr>
@@ -82,7 +98,7 @@
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/head-support/README.md">
-                    head-support
+                    head&#8209;support
                 </a>
             </td>
             <td>
@@ -96,15 +112,14 @@
                 </a>
             </td>
             <td>
-                Provides a <code>morph</code> swap strategy based on the <a href="https://github.com/bigskysoftware/idiomorph/">idiomorph</a>
+                Provides a <code>morph</code> swap strategy based on the <a
+                    href="https://github.com/bigskysoftware/idiomorph/">idiomorph</a>
                 morphing library, which was created by the htmx team.
             </td>
         </tr>
         </tbody>
     </table>
-    <h2>Community</h2>
-    <p>These are extensions that are not part of our core set or that have been submitted by the community. To submit
-        an extension, create a pull request against the <code>index.html</code> file.</p>
+    <h2 id="core"><a href="#core">Community</a></h2>
     <input placeholder="search community extensions"
            type="search"
            _="on input
@@ -120,7 +135,7 @@
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/ajax-header/README.md">
-                    ajax-header
+                    ajax&#8209;header
                 </a>
             </td>
             <td>
@@ -134,7 +149,8 @@
                 </a>
             </td>
             <td>
-                Provides a <code>morph</code> swap strategy based on the <a href="https://github.com/patrick-steele-idem/morphdom/">morphdom</a>
+                Provides a <code>morph</code> swap strategy based on the <a
+                    href="https://github.com/patrick-steele-idem/morphdom/">morphdom</a>
                 morphing library.
             </td>
         </tr>
