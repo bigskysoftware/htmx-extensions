@@ -1,8 +1,6 @@
 # htmx-extensions
-The officially supported extensions for htmx. We have plans to build out a library of 3P extensions as well.
 
-If you want to run the tests, make sure to `npm install` first.
+This is the extensions repository for htmx and includes the website found at https://extensions.htmx.org.
 
-To run the tests in the CLI, use `npm test` (requires node 20)
-
-To run the tests in your browser, open `test/index.html`
+If you wish to add your own community extension, please create a PR against `/www/index.html` with a link to your
+git repositories `README.md` file.

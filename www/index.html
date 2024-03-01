@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>HTML: The Programming Language</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <style>
+        body {
+            font-family: Verdana, sans-serif;
+            max-width: 768px;
+            margin: auto;
+            padding: 16px 16px 800px;
+        }
+
+        input[type=search] {
+            width: 100%;
+            padding 2px;
+            border: 1px solid darkgray;
+            border-radius: 4px;
+            background-color: whitesmoke;
+            height: 2.5em;
+            box-shadow: inset 1px 1px lightgray;
+        }
+        main {
+            padding: 16px;
+            margin: 16px;
+        }
+
+        p {
+            margin: 16px;
+            line-height: 1.8em;
+        }
+
+        tr td {
+            padding: 12px;
+            line-height: 1.8em;
+        }
+    </style>
+    <script src="_hyperscript.min.js"></script>
+</head>
+<body>
+<main>
+    <h1>&lt;/> htmx extensions</h1>
+    <p>This site is a searchable collection of extensions for <a href="https://htmx.org">htmx.org</a></p>
+    <h2>Core</h2>
+    <p>These are the core extensions for htmx supported by the htmx team.</p>
+    <input placeholder="search core extensions"
+           type="search"
+           _="on input
+                   show <tbody tr/> in the next <table/> when its innerText.toLowerCase() contains my value.toLowerCase()">
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/sse/README.md">
+                    sse
+                </a>
+            </td>
+            <td>
+                Provides support for
+                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events">Server Sent Events</a>
+                directly from HTML.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/ws/README.md">
+                    ws
+                </a>
+            </td>
+            <td>
+                Provides bi-directional communication with
+                <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications">Web Sockets</a>
+                servers directly from HTML
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/head-support/README.md">
+                    head-support
+                </a>
+            </td>
+            <td>
+                Provides support for merging head tag information (styles, etc.) in htmx requests
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/idiomorph/blob/main/README.md#htmx">
+                    idiomorph
+                </a>
+            </td>
+            <td>
+                Provides a <code>morph</code> swap strategy based on the <a href="https://github.com/bigskysoftware/idiomorph/">idiomorph</a>
+                morphing library, which was created by the htmx team.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <h2>Community</h2>
+    <p>These are extensions that are not part of our core set or that have been submitted by the community. To submit
+        an extension, create a pull request against the <code>index.html</code> file.</p>
+    <input placeholder="search community extensions"
+           type="search"
+           _="on input
+                   show <tbody tr/> in the next <table/> when its innerText.toLowerCase() contains my value.toLowerCase()">
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/ajax-header/README.md">
+                    ajax-header
+                </a>
+            </td>
+            <td>
+                Adds an <code>X-Requested-With</code> header to all requests made by htmx
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/morphdom-swap/README.md">
+                    ws
+                </a>
+            </td>
+            <td>
+                Provides a <code>morph</code> swap strategy based on the <a href="https://github.com/patrick-steele-idem/morphdom/">morphdom</a>
+                morphing library.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</main>
+</body>
