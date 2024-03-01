@@ -1,9 +1,20 @@
 {
   "name": "htmx-extensions",
+  "version": "2.0.0-alpha2",
+  "homepage": "https://extensions.htmx.org/",
+  "bugs": {
+    "url": "https://github.com/bigskysoftware/htmx-extensions/issues"
+  },
   "scripts": {
-    "lint": "eslint src test",
-    "format": "eslint --fix src test",
-    "test": "mocha-chrome test/index.html"
+    "lint": "eslint ext test",
+    "lint-fix": "eslint ext test --fix",
+    "format": "eslint --fix ext test",
+    "test": "mocha-chrome test/index.html",
+    "www": "bash ./scripts/www.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bigskysoftware/htmx-extensions.git"
   },
   "eslintConfig": {
     "extends": "standard",
