@@ -1,1 +1,4 @@
-{"name": "htmx-1-compat", "version": "1.0.0"}
+{
+  "name": "htmx-ext-htmx-1-compat",
+  "version": "1.0.0"
+}
