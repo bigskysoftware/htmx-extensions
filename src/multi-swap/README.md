@@ -8,7 +8,7 @@ It is a very powerful tool in conjunction with `hx-boost` and `preload` extensio
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx.org/dist/ext/multi-swap.js"></script>
+<script src="https://unpkg.com/htmx-ext-multi-swap/multi-swap.js@2.0.0"></script>
 ```
 
 ## Usage

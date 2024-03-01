@@ -23,7 +23,7 @@ A second "array" version of each template is now offered, which is particularly 
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx.org/dist/ext/client-side-templates.js"></script>
+<script src="https://unpkg.com/htmx-ext-client-side-templates/client-side-templates.js@2.0.0"></script>
 ```
 
 ## Usage
@@ -63,7 +63,7 @@ a [`<template>` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/t
   <meta name="viewport" content="width=device-width">
   <title>JS Bin</title>
   <script src="https://unpkg.com/htmx.org"></script>
-  <script src="https://unpkg.com/htmx.org/dist/ext/client-side-templates.js"></script>
+  <script src="https://unpkg.com/htmx-ext-client-side-templates/client-side-templates.js@2.0.0"></script>
   <script src="https://unpkg.com/mustache@latest"></script>
 </head>
 <body>
@@ -96,7 +96,7 @@ Here's a working example using the `mustache-array-template` working against an 
   <meta name="viewport" content="width=device-width">
   <title>JS Bin</title>
   <script src="https://unpkg.com/htmx.org"></script>
-  <script src="https://unpkg.com/htmx.org/dist/ext/client-side-templates.js"></script>
+  <script src="https://unpkg.com/htmx-ext-client-side-templates/client-side-templates.js@2.0.0"></script>
   <script src="https://unpkg.com/mustache@latest"></script>
 </head>
 <body>
@@ -137,7 +137,7 @@ Some styling is needed to keep the object visible while not taking any space.
   <meta name="viewport" content="width=device-width">
   <title>JS Bin</title>
   <script src="https://unpkg.com/htmx.org"></script>
-  <script src="https://unpkg.com/htmx.org/dist/ext/client-side-templates.js"></script>
+  <script src="https://unpkg.com/htmx-ext-client-side-templates/client-side-templates.js@2.0.0"></script>
 </head>
 <body>
   <div hx-ext="client-side-templates">

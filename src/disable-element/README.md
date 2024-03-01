@@ -6,7 +6,7 @@ This extension disables an element during an htmx request, when configured on th
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx.org/dist/ext/disable-element.js"></script>
+<script src="https://unpkg.com/htmx-ext-disable-element/disable-element.js@2.0.0"></script>
 ```
 
 ## Usage

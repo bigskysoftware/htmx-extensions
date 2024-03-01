@@ -7,7 +7,7 @@ The `morphdom` library does not support morph element to multiple elements. If t
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx.org/dist/ext/morphdom-swap.js"></script>
+<script src="https://unpkg.com/htmx-ext-morphdom-swap/morphdom-swap.js@2.0.0"></script>
 ```
 
 ### Usage

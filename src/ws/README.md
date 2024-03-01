@@ -15,7 +15,7 @@ Use the following attributes to configure how WebSockets behave:
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+<script src="https://unpkg.com/htmx-ext-ws/ws.js@2.0.0"></script>
 ```
 
 ## Usage

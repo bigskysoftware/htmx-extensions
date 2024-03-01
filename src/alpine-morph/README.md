@@ -3,7 +3,7 @@ Alpine.js now has a lightweight [morph plugin](https://alpinejs.dev/plugins/morp
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx.org/dist/ext/alpine-morph.js"></script>
+<script src="https://unpkg.com/htmx-ext-alpine-morph/alpine-morph.js@2.0.0"></script>
 ```
 
 ## Usage

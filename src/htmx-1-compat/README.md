@@ -3,7 +3,7 @@ The `htmx-1-compat` extension allows you to almost seamlessly upgrade from htmx 
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx-ext-htmx-1-compat@1.0.0/htmx-1-compat.js"></script>
+<script src="https://unpkg.com/htmx-ext-htmx-1-compat@2.0.0/htmx-1-compat.js"></script>
 ```
 
 ## What it covers

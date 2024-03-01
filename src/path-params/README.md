@@ -4,7 +4,7 @@ This extension uses request parameters to populate path variables. Used paramete
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx.org/dist/ext/path-params.js">
+<script src="https://unpkg.com/htmx-ext-path-params/path-params.js@2.0.0">
 ```
 
 ## Usage
