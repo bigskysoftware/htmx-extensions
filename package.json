@@ -1,8 +1,8 @@
 {
   "name": "htmx-extensions",
   "scripts": {
-    "lint": "eslint ext test",
-    "format": "eslint --fix ext test",
+    "lint": "eslint src test",
+    "format": "eslint --fix src test",
     "test": "mocha-chrome test/index.html"
   },
   "eslintConfig": {
