@@ -8,14 +8,25 @@
             font-family: Verdana, sans-serif;
             max-width: 768px;
             margin: auto;
-            padding: 16px 16px;
+            padding: 4px 4px;
         }
 
         h1 {
+            font-size: 3.5em;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
+        @media only screen and (max-width: 768px) {
+            img {
+                transform: scale(140%);
+            }
+            h1 {
+                flex-direction:column;
+            }
+        }
+
 
         h1 img {
             padding: 32px;
@@ -58,7 +69,11 @@
         This site is a searchable collection of extensions for <a href="https://htmx.org">htmx.org</a>.
     </p>
     <p>
-        <a href="#core">Core</a> extensions are actively maintained by the htmx team.</p>
+        <a href="#core">Core</a> extensions are actively maintained by the htmx team.
+    </p>
+    <p>
+        <a href="#community">Community</a> extensions are contributed by the community or rarely touched by the htmx
+        team (although they still work!)
     </p>
     <details>
         <summary><b>Contributing</b></summary>
@@ -109,7 +124,7 @@
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/head-support/README.md">
-                    head&#8209;support
+                    head-support
                 </a>
             </td>
             <td>
@@ -131,7 +146,7 @@
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/htmx-1-compat/README.md">
-                    htmx&#8209;1&#8209;compat
+                    htmx-1-compat
                 </a>
             </td>
             <td>
@@ -152,7 +167,7 @@
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/response-targets/README.md">
-                    response&#8209;targets
+                    response-targets
                 </a>
             </td>
             <td>
@@ -178,7 +193,7 @@
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/ajax-header/README.md">
-                    ajax&#8209;header
+                    ajax-header
                 </a>
             </td>
             <td>
@@ -188,18 +203,18 @@
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/alpine-morph/README.md">
-                    alpine&#8209;morph
+                    alpine-morph
                 </a>
             </td>
             <td>
-                Alpine.js now has a lightweight [morph plugin](https://alpinejs.dev/plugins/morph) and this extension
+                Alpine.js now has a lightweight <a href="https://alpinejs.dev/plugins/morph">morph plugin]</a> and this extension
                 allows you to use it as the swapping mechanism in htmx which is necessary to retain Alpine state when you have entire Alpine components swapped by htmx.
             </td>
         </tr>
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/class-tools/README.md">
-                    class&#8209;tools
+                    class-tools
                 </a>
             </td>
             <td>
@@ -210,7 +225,7 @@
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/client-side-templates/README.md">
-                    client&#8209;side&#8209;templates
+                    client-side-templates
                 </a>
             </td>
             <td>
