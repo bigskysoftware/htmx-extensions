@@ -1,5 +1,5 @@
 {
-  "name": "htmx-client-side-templates",
+  "name": "htmx-ext-client-side-templates",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",

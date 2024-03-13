@@ -1,5 +1,5 @@
 {
-  "name": "htmx-remove-me",
+  "name": "htmx-ext-remove-me",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",

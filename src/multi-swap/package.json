@@ -1,5 +1,5 @@
 {
-  "name": "htmx-multi-swap",
+  "name": "htmx-ext-multi-swap",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",

@@ -1,5 +1,5 @@
 {
-  "name": "htmx-path-params",
+  "name": "htmx-ext-path-params",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",

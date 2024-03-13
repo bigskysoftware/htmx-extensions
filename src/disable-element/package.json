@@ -1,5 +1,5 @@
 {
-  "name": "htmx-disable-element",
+  "name": "htmx-ext-disable-element",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",
