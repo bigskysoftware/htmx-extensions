@@ -1,5 +1,5 @@
 {
-  "name": "sse",
+  "name": "htmx-sse",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",

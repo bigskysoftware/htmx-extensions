@@ -1,5 +1,5 @@
 {
-  "name": "include-vals",
+  "name": "htmx-include-vals",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",

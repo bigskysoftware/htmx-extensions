@@ -1,5 +1,5 @@
 {
-  "name": "morphdom-swap",
+  "name": "htmx-morphdom-swap",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",

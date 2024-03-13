@@ -53,8 +53,9 @@
 
     <details>
         <summary>Contributing</summary>
-        If you'd like to add your extension to this website, add a row to the table below in a PR agains the
-        <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/www/index.html"><code>/www/index.html</code></a> file.
+        If you'd like to add your extension to this website, add a row to the table below in a PR against the
+        <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/www/index.html"><code>/www/index.html</code></a>
+        file.
     </details>
 
     <h2 id="core"><a href="#core">Core</a></h2>
@@ -91,7 +92,8 @@
             </td>
             <td>
                 Provides bi-directional communication with
-                <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications">Web Sockets</a>
+                <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications">Web
+                    Sockets</a>
                 servers directly from HTML
             </td>
         </tr>
@@ -115,6 +117,38 @@
                 Provides a <code>morph</code> swap strategy based on the <a
                     href="https://github.com/bigskysoftware/idiomorph/">idiomorph</a>
                 morphing library, which was created by the htmx team.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/htmx-1-compat/README.md">
+                    htmx-1-compat
+                </a>
+            </td>
+            <td>
+                Rolls back most of the behavioral changes of htmx 2 to the htmx 1 defaults.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/preload/README.md">
+                    preload
+                </a>
+            </td>
+            <td>
+                This extension allows you to load HTML fragments into your browser's cache before they are requested by
+                the user, so that additional pages appear to users to load nearly instantaneously.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/response-targets/README.md">
+                    response-targets
+                </a>
+            </td>
+            <td>
+                This extension allows you to specify different target elements to be swapped when
+                different HTTP response codes are received.
             </td>
         </tr>
         </tbody>
@@ -144,14 +178,167 @@
         </tr>
         <tr>
             <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/alpine-morph/README.md">
+                    alpine&#8209;morph
+                </a>
+            </td>
+            <td>
+                Alpine.js now has a lightweight [morph plugin](https://alpinejs.dev/plugins/morph) and this extension
+                allows you to use it as the swapping mechanism in htmx which is necessary to retain Alpine state when you have entire Alpine components swapped by htmx.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/class-tools/README.md">
+                    class&#8209;tools
+                </a>
+            </td>
+            <td>
+                The `class-tools` extension  allows you to specify CSS classes that will be swapped onto or off of the elements by using
+                a `classes` or `data-classes` attribute.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/client-side-templates/README.md">
+                    client&#8209;side&#8209;templates
+                </a>
+            </td>
+            <td>
+                This extension supports transforming a JSON/XML request response into HTML via a client-side template before it is
+                swapped into the DOM.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/debug/README.md">
+                    debug
+                </a>
+            </td>
+            <td>
+                This extension includes log all htmx events for the element it is on, either through the `console.debug` function
+                or through the `console.log` function with a `DEBUG:` prefix.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/disable-element/README.md">
+                    disable-element
+                </a>
+            </td>
+            <td>
+                This extension disables an element during an htmx request, when configured on the element triggering the
+                request.  Note that this functionality is now part of the core of htmx via the <code>hx-disabled-elt</code>
+                attribute
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/event-header/README.md">
+                    event-header
+                </a>
+            </td>
+            <td>
+                This extension adds the `Triggering-Event` header to requests.  The value of
+                the header is a JSON serialized version of the event that triggered the
+                request.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/include-vals/README.md">
+                    include-vals
+                </a>
+            </td>
+            <td>
+                The `include-vals` extension allows you to programmatically include values in a request with
+                a `include-vals` attribute.  The value of this attribute is one or more name/value pairs, which
+                will be evaluated as the fields in a javascript object literal.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/json-enc/README.md">
+                    json-enc
+                </a>
+            </td>
+            <td>
+                This extension encodes parameters in JSON format instead of url format.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/loading-states/README.md">
+                    loading-states
+                </a>
+            </td>
+            <td>
+                This extension allows you to easily manage loading states while a request is in flight, including
+                disabling elements, and adding and removing CSS classes.
+            </td>
+        </tr>
+        <tr>
+            <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/morphdom-swap/README.md">
-                    ws
+                    morphdom-swap
                 </a>
             </td>
             <td>
                 Provides a <code>morph</code> swap strategy based on the <a
-                    href="https://github.com/patrick-steele-idem/morphdom/">morphdom</a>
-                morphing library.
+                    href="https://github.com/patrick-steele-idem/morphdom/">morphdom</a> morphing library.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/multi-swap/README.md">
+                    multi-swap
+                </a>
+            </td>
+            <td>
+                This extension allows you to swap multiple elements marked from the HTML response. You can also choose for
+                each element which swap method should be used.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/path-deps/README.md">
+                    path-deps
+                </a>
+            </td>
+            <td>
+                This extension supports expressing inter-element dependencies based on paths, inspired by the
+                <a href="http://intercoolerjs.org/docs.html#dependencies">intercooler.js dependencies mechanism</a>.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/path-params/README.md">
+                    path-params
+                </a>
+            </td>
+            <td>
+                This extension uses request parameters to populate path variables. Used parameters are removed so they
+                won't be sent in the query string or body anymore.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/remove-me/README.md">
+                    remove-me
+                </a>
+            </td>
+            <td>
+                Allows you to remove an element after a specified interval.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/restored/README.md">
+                    restored
+                </a>
+            </td>
+            <td>
+                Triggers an event whenever a back button even is detected while using <code>hx-boost</code>
             </td>
         </tr>
         </tbody>

@@ -1,5 +1,5 @@
 {
-  "name": "loading-states",
+  "name": "htmx-loading-states",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",
