@@ -13,7 +13,7 @@ Use the following attributes to configure how SSE connections behave:
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx-ext-sse/sse.js@2.0.0"></script>
+<script src="https://unpkg.com/htmx-ext-sse@2.0.0/sse.js"></script>
 ```
 
 ## Usage

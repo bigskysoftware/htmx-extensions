@@ -5,7 +5,7 @@ This header is commonly used by javascript frameworks to differentiate ajax requ
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx-ext-ajax-header/ajax-header.js@2.0.0"></script>
+<script src="https://unpkg.com/htmx-ext-ajax-header@2.0.0/ajax-header.js"></script>
 ```
 
 ## Usage

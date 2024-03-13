@@ -6,7 +6,7 @@ will be evaluated as the fields in a javascript object literal.
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx-ext-include-vals/include-vals.js@2.0.0"></script>
+<script src="https://unpkg.com/htmx-ext-include-vals@2.0.0/include-vals.js"></script>
 ```
 
 ## Usage

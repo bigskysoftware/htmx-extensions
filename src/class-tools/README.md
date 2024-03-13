@@ -15,7 +15,7 @@ optionally followed by a colon `:` and a time delay.
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx-ext-class-tools/class-tools.js@2.0.0"></script>
+<script src="https://unpkg.com/htmx-ext-class-tools@2.0.0/class-tools.js"></script>
 ```
 
 ## Usage

@@ -4,7 +4,7 @@ The `remove-me` extension allows you to remove an element after a specified inte
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx-ext-remove-me/remove-me.js@2.0.0"></script>
+<script src="https://unpkg.com/htmx-ext-remove-me@2.0.0/remove-me.js"></script>
 ```
 
 ## Usage

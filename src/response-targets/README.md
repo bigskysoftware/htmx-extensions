@@ -21,7 +21,7 @@ The value of each attribute can be:
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx-ext-response-targets/response-targets.js@2.0.0"></script>
+<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
 ```
 
 ## Configure (optional)
