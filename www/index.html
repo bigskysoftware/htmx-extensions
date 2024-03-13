@@ -8,17 +8,23 @@
             font-family: Verdana, sans-serif;
             max-width: 768px;
             margin: auto;
-            padding: 16px 16px 800px;
+            padding: 16px 16px;
+        }
+
+        h1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 img {
+            padding: 32px;
         }
 
         input[type=search] {
             width: 100%;
-            padding: 2px;
-            border: 1px solid darkgray;
+            padding: 12px;
             border-radius: 4px;
-            background-color: whitesmoke;
-            height: 2.5em;
-            box-shadow: inset 1px 1px lightgray;
             margin-bottom: 12px;
         }
 
@@ -46,13 +52,16 @@
 </head>
 <body>
 <main>
-    <h1>&lt;/> - extensions.htmx.org</h1>
+    <h1><img src="htmx-crew.png"> htmx extensions</h1>
 
-    <p>This site is a searchable collection of extensions for <a href="https://htmx.org">htmx.org</a>.
+    <p>
+        This site is a searchable collection of extensions for <a href="https://htmx.org">htmx.org</a>.
+    </p>
+    <p>
         <a href="#core">Core</a> extensions are actively maintained by the htmx team.</p>
-
+    </p>
     <details>
-        <summary>Contributing</summary>
+        <summary><b>Contributing</b></summary>
         If you'd like to add your extension to this website, add a row to the table below in a PR against the
         <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/www/index.html"><code>/www/index.html</code></a>
         file.
@@ -122,7 +131,7 @@
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/htmx-1-compat/README.md">
-                    htmx-1-compat
+                    htmx&#8209;1&#8209;compat
                 </a>
             </td>
             <td>
@@ -143,7 +152,7 @@
         <tr>
             <td>
                 <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/response-targets/README.md">
-                    response-targets
+                    response&#8209;targets
                 </a>
             </td>
             <td>
@@ -153,7 +162,7 @@
         </tr>
         </tbody>
     </table>
-    <h2 id="community"><a href="#core">Community</a></h2>
+    <h2 id="community"><a href="#community">Community</a></h2>
     <input placeholder="search community extensions"
            type="search"
            _="on input
