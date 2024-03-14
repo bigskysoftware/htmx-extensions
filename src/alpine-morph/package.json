@@ -1,5 +1,6 @@
 {
   "name": "htmx-ext-alpine-morph",
+  "main": "alpine-morph.js",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",

@@ -1,6 +1,7 @@
 {
   "name": "htmx-ext-ajax-header",
-  "version": "2.0.0",
+  "version": "2.0.1",
+  "main": "ajax-header.js",
   "scripts": {
     "lint": "eslint test/ext test",
     "lint-fix": "eslint test/ext test --fix",

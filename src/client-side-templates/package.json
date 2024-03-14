@@ -1,5 +1,6 @@
 {
   "name": "htmx-ext-client-side-templates",
+  "main": "client-side-templates.js",
   "version": "2.0.0",
   "scripts": {
     "lint": "eslint test/ext test",
