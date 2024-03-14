@@ -1,5 +1,8 @@
 #!/bin/bash
-for dir in ../src/*; do
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+for dir in $SCRIPT_DIR/../src/*; do
     if [ -d "$dir/test" ]; then
         (
             cd "$dir"
