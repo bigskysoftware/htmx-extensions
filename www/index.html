@@ -11,25 +11,28 @@
             padding: 4px 4px;
         }
 
+        .blue {
+            color: #3d72d7
+        }
+
+        .slash {
+            position: relative;
+            padding: 8px;
+            font-size: 1.2em;
+            top: 14px;
+        }
+
         h1 {
-            font-size: 3.5em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: Helvetica, sans-serif;
+            font-size: 5em;
+            text-align: center;
+            margin: 0;
         }
 
-        @media only screen and (max-width: 768px) {
-            img {
-                transform: scale(140%);
-            }
-            h1 {
-                flex-direction:column;
-            }
-        }
-
-
-        h1 img {
-            padding: 32px;
+        h2 {
+            font-size: 2em;
+            text-align: center;
+            margin: 0;
         }
 
         input[type=search] {
@@ -63,8 +66,9 @@
 </head>
 <body>
 <main>
-    <h1><img src="htmx-crew.png"> htmx extensions</h1>
 
+    <h1>&lt;<span class="blue slash">/</span>&gt; htm<span class="blue">x</span></span></span></h1>
+    <h2>extensions</h2>
     <p>
         This site is a searchable collection of extensions for <a href="https://htmx.org">htmx 2.0</a>.  They are not
         guaranteed to work with the htmx 1.x codebase.
@@ -83,7 +87,7 @@
         file.
     </details>
 
-    <h2 id="core"><a href="#core">Core</a></h2>
+    <h3 id="core"><a href="#core">Core</a></h3>
     <input placeholder="search core extensions"
            type="search"
            _="on input
@@ -178,7 +182,7 @@
         </tr>
         </tbody>
     </table>
-    <h2 id="community"><a href="#community">Community</a></h2>
+    <h3 id="community"><a href="#community">Community</a></h3>
     <input placeholder="search community extensions"
            type="search"
            _="on input
