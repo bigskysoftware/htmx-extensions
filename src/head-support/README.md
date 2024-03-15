@@ -1,6 +1,3 @@
-+++
-title = "head-support"
-+++
 
 The `head-support` extension adds support for [head tags](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/head)
 in responses to htmx requests.
@@ -11,14 +8,12 @@ which was focused on merging entire web pages retrieved via AJAX into the browse
 
 The [`hx-boost`](@/attributes/hx-boost.md) attribute moved htmx closer to this world of full HTML-document support &
 support for extracting the `title` tag out of head elements was eventually added, but full head tag support has never been
-a feature of the library.
-
-This extension addresses that shortcoming & will likely be integrated into htmx for the 2.0 release.
+a feature of the library.  This extension addresses that shortcoming.
 
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/head-support.js"></script>
+<script src="https://unpkg.com/htmx-ext-head-support@2.0.0/head-support.js"></script>
 ```
 
 ## Usage
