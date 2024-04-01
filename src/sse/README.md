@@ -9,6 +9,7 @@ Use the following attributes to configure how SSE connections behave:
 * `sse-connect="<url>"` - The URL of the SSE server.
 * `sse-swap="<message-name>"` - The name of the message to swap into the DOM.
 * `hx-trigger="sse:<message-name>"` - SSE messages can also trigger HTTP callbacks using the [`hx-trigger`](https://htmx.org/reference/hx-trigger.md) attribute.
+* `sse-close=<message-name>` - To close the EventStream gracefully when that message is received. This might be helpful if you want to send information to a client that will eventually stop.
 
 ## Install
 
