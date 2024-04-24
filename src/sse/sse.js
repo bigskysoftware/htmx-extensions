@@ -27,6 +27,10 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       }
     },
 
+    getSelectors: function() {
+      return ['[sse-connect]', '[data-sse-connect]', '[sse-swap]', '[data-sse-swap]']
+    },
+
     /**
      * onEvent handles all events passed to this extension.
      *
@@ -48,7 +52,9 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
 
         // Try to create EventSources when elements are processed
         case 'htmx:afterProcessNode':
-          ensureEventSourceOnElement(parent)
+          if (api.extensionEnabled(parent, 'sse')) {
+            ensureEventSourceOnElement(parent)
+          }
       }
     }
   })
@@ -77,9 +83,9 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
    */
   function registerSSE(elt) {
     // Add message handlers for every `sse-swap` attribute
-    queryAttributeOnThisOrChildren(elt, 'sse-swap').forEach(function(child) {
+    if (api.getAttributeValue(elt, 'sse-swap')) {
       // Find closest existing event source
-      var sourceElement = api.getClosestMatch(child, hasEventSource)
+      var sourceElement = api.getClosestMatch(elt, hasEventSource)
       if (sourceElement == null) {
         // api.triggerErrorEvent(elt, "htmx:noSSESourceError")
         return null // no eventsource in parentage, orphaned element
@@ -89,7 +95,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       var internalData = api.getInternalData(sourceElement)
       var source = internalData.sseEventSource
 
-      var sseSwapAttr = api.getAttributeValue(child, 'sse-swap')
+      var sseSwapAttr = api.getAttributeValue(elt, 'sse-swap')
       var sseEventNames = sseSwapAttr.split(',')
 
       for (var i = 0; i < sseEventNames.length; i++) {
@@ -101,7 +107,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
           }
 
           // If the body no longer contains the element, remove the listener
-          if (!api.bodyContains(child)) {
+          if (!api.bodyContains(elt)) {
             source.removeEventListener(sseEventName, listener)
             return
           }
@@ -110,20 +116,20 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
           if (!api.triggerEvent(elt, 'htmx:sseBeforeMessage', event)) {
             return
           }
-          swap(child, event.data)
+          swap(elt, event.data)
           api.triggerEvent(elt, 'htmx:sseMessage', event)
         }
 
         // Register the new listener
-        api.getInternalData(child).sseEventListener = listener
+        api.getInternalData(elt).sseEventListener = listener
         source.addEventListener(sseEventName, listener)
       }
-    })
+    }
 
     // Add message handlers for every `hx-trigger="sse:*"` attribute
-    queryAttributeOnThisOrChildren(elt, 'hx-trigger').forEach(function(child) {
+    if (api.getAttributeValue(elt, 'hx-trigger')) {
       // Find closest existing event source
-      var sourceElement = api.getClosestMatch(child, hasEventSource)
+      var sourceElement = api.getClosestMatch(elt, hasEventSource)
       if (sourceElement == null) {
         // api.triggerErrorEvent(elt, "htmx:noSSESourceError")
         return null // no eventsource in parentage, orphaned element
@@ -133,7 +139,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       var internalData = api.getInternalData(sourceElement)
       var source = internalData.sseEventSource
 
-      var sseEventName = api.getAttributeValue(child, 'hx-trigger')
+      var sseEventName = api.getAttributeValue(elt, 'hx-trigger')
       if (sseEventName == null) {
         return
       }
@@ -148,19 +154,19 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
           return
         }
 
-        if (!api.bodyContains(child)) {
+        if (!api.bodyContains(elt)) {
           source.removeEventListener(sseEventName, listener)
         }
 
         // Trigger events to be handled by the rest of htmx
-        htmx.trigger(child, sseEventName, event)
-        htmx.trigger(child, 'htmx:sseMessage', event)
+        htmx.trigger(elt, sseEventName, event)
+        htmx.trigger(elt, 'htmx:sseMessage', event)
       }
 
       // Register the new listener
       api.getInternalData(elt).sseEventListener = listener
       source.addEventListener(sseEventName.slice(4), listener)
-    })
+    }
   }
 
   /**
@@ -177,14 +183,14 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
     }
 
     // handle extension source creation attribute
-    queryAttributeOnThisOrChildren(elt, 'sse-connect').forEach(function(child) {
-      var sseURL = api.getAttributeValue(child, 'sse-connect')
+    if (api.getAttributeValue(elt, 'sse-connect')) {
+      var sseURL = api.getAttributeValue(elt, 'sse-connect')
       if (sseURL == null) {
         return
       }
 
-      ensureEventSource(child, sseURL, retryCount)
-    })
+      ensureEventSource(elt, sseURL, retryCount)
+    }
 
     registerSSE(elt)
   }
@@ -246,27 +252,6 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
     return false
   }
 
-  /**
-   * queryAttributeOnThisOrChildren returns all nodes that contain the requested attributeName, INCLUDING THE PROVIDED ROOT ELEMENT.
-   *
-   * @param {HTMLElement} elt
-   * @param {string} attributeName
-   */
-  function queryAttributeOnThisOrChildren(elt, attributeName) {
-    var result = []
-
-    // If the parent element also contains the requested attribute, then add it to the results too.
-    if (api.hasAttribute(elt, attributeName)) {
-      result.push(elt)
-    }
-
-    // Search all child nodes that match the requested attribute
-    elt.querySelectorAll('[' + attributeName + '], [data-' + attributeName + ']').forEach(function(node) {
-      result.push(node)
-    })
-
-    return result
-  }
 
   /**
    * @param {HTMLElement} elt
@@ -282,27 +267,6 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
     api.swap(target, content, swapSpec)
   }
 
-  /**
-   * doSettle mirrors much of the functionality in htmx that
-   * settles elements after their content has been swapped.
-   * TODO: this should be published by htmx, and not duplicated here
-   * @param {import("../htmx").HtmxSettleInfo} settleInfo
-   * @returns () => void
-   */
-  function doSettle(settleInfo) {
-    return function() {
-      settleInfo.tasks.forEach(function(task) {
-        task.call()
-      })
-
-      settleInfo.elts.forEach(function(elt) {
-        if (elt.classList) {
-          elt.classList.remove(htmx.config.settlingClass)
-        }
-        api.triggerEvent(elt, 'htmx:afterSettle')
-      })
-    }
-  }
 
   function hasEventSource(node) {
     return api.getInternalData(node).sseEventSource != null

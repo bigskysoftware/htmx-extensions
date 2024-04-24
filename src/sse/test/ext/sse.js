@@ -57,6 +57,28 @@ describe('sse extension', function() {
     clearWorkArea()
   })
 
+  it('correctly subscribes to events', function() {
+    make('<div hx-ext="sse" sse-connect="/foo">' +
+            '<div sse-connect="/foo">' +
+            '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
+            '</div>' +
+            '</div>')
+
+    this.eventSource.url.should.be.equal('/foo');
+    this.eventSource._listeners.e1.should.be.lengthOf(1)
+  })
+
+  it('correctly behaves when ignored', function() {
+    make('<div hx-ext="sse" sse-connect="/foo">' +
+            '<div hx-ext="ignore:sse" sse-connect="/foo">' +
+            '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
+            '</div>' +
+            '</div>');
+
+    this.eventSource.url.should.be.equal('/foo');
+    (this.eventSource._listeners.e1 == undefined).should.be.true
+  })
+
   it('handles basic sse triggering', function() {
     this.server.respondWith('GET', '/d1', 'div1 updated')
     this.server.respondWith('GET', '/d2', 'div2 updated')
@@ -229,6 +251,20 @@ describe('sse extension', function() {
     this.eventSource.sendEvent('e1', '<div id="d2" sse-swap="e2"></div>');
 
     (byId('d2')['htmx-internal-data'].sseEventSource == undefined).should.be.true
+  })
+
+  it('triggers events with naked hx-trigger', function() {
+    var div = make( '<div hx-ext="sse"><div sse-connect="/foo"><div id="d2" hx-trigger="sse:e2">div2</div></div></div>')
+
+    let triggerCounter = 0
+    div.addEventListener("htmx:trigger", () => triggerCounter++)
+    let sseMessageCounter = 0
+    div.addEventListener("htmx:sseMessage", () => sseMessageCounter++)
+
+    this.eventSource.sendEvent('e2')
+
+    triggerCounter.should.be.equal(1)
+    sseMessageCounter.should.be.equal(1)
   })
 
   it('initializes connections in swapped content', function() {
