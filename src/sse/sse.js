@@ -52,9 +52,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
 
         // Try to create EventSources when elements are processed
         case 'htmx:afterProcessNode':
-          if (api.extensionEnabled(parent, 'sse')) {
-            ensureEventSourceOnElement(parent)
-          }
+          ensureEventSourceOnElement(parent)
       }
     }
   })
