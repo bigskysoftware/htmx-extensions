@@ -137,33 +137,34 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       var internalData = api.getInternalData(sourceElement)
       var source = internalData.sseEventSource
 
-      var sseEventName = api.getAttributeValue(elt, 'hx-trigger')
-      if (sseEventName == null) {
-        return
-      }
+      var triggerAttr = api.getAttributeValue(elt, 'hx-trigger')
+      var sseEventNames = triggerAttr.split(',')
 
-      // Only process hx-triggers for events with the "sse:" prefix
-      if (sseEventName.slice(0, 4) != 'sse:') {
-        return
-      }
-
-      var listener = function(event) {
-        if (maybeCloseSSESource(sourceElement)) {
-          return
+      for (var i = 0; i < sseEventNames.length; i++) {
+        var sseEventName = sseEventNames[i].trim()
+        // Only process hx-triggers for events with the "sse:" prefix
+        if (sseEventName.slice(0, 4) != 'sse:') {
+          continue
         }
 
-        if (!api.bodyContains(elt)) {
-          source.removeEventListener(sseEventName, listener)
+        var listener = function (event) {
+          if (maybeCloseSSESource(sourceElement)) {
+            return
+          }
+
+          if (!api.bodyContains(elt)) {
+            source.removeEventListener(sseEventName.slice(4), listener)
+          }
+
+          // Trigger events to be handled by the rest of htmx
+          htmx.trigger(elt, sseEventName, event)
+          htmx.trigger(elt, 'htmx:sseMessage', event)
         }
 
-        // Trigger events to be handled by the rest of htmx
-        htmx.trigger(elt, sseEventName, event)
-        htmx.trigger(elt, 'htmx:sseMessage', event)
+        // Register the new listener
+        api.getInternalData(elt).sseEventListener = listener
+        source.addEventListener(sseEventName.slice(4), listener)
       }
-
-      // Register the new listener
-      api.getInternalData(elt).sseEventListener = listener
-      source.addEventListener(sseEventName.slice(4), listener)
     }
   }
 

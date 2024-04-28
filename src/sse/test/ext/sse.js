@@ -99,6 +99,36 @@ describe('sse extension', function() {
     byId('d2').innerHTML.should.equal('div2 updated')
   })
 
+  it('supports hx-trigger\'s multiple triggers syntax', function() {
+    this.server.respondWith('GET', '/d1', 'div1 updated')
+    this.server.respondWith('GET', '/d2', 'div2 updated')
+    this.server.respondWith('GET', '/d3', 'div3 updated')
+
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" hx-trigger="click, whatever from:body, sse:e1" hx-get="/d1">div1</div>' +
+      '<div id="d2" hx-trigger="keyup, sse:e2, someTrigger" hx-get="/d2">div2</div>' +
+      '<div id="d3" hx-trigger="sse:e3, anotherTrigger" hx-get="/d3">div3</div>' +
+      '</div>')
+
+    this.eventSource.sendEvent('e1')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2')
+    byId('d3').innerHTML.should.equal('div3')
+
+    this.eventSource.sendEvent('e2')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2 updated')
+    byId('d3').innerHTML.should.equal('div3')
+
+    this.eventSource.sendEvent('e3')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2 updated')
+    byId('d3').innerHTML.should.equal('div3 updated')
+  })
+
   it('does not trigger events that arent named', function() {
     this.server.respondWith('GET', '/d1', 'div1 updated')
 
