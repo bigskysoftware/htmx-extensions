@@ -1,0 +1,28 @@
+name: Tests - htmx-1-compat
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/htmx-1-compat/**'
+      - '.github/workflows/htmx-1-compat.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/htmx-1-compat/**'
+      - '.github/workflows/htmx-1-compat.yml'
+  workflow_dispatch:
+
+jobs:
+  test_suite:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+        working-directory: ./src/htmx-1-compat
+      - run: npm test
+        working-directory: ./src/htmx-1-compat

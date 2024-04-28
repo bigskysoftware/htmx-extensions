@@ -1,0 +1,28 @@
+name: Tests - morphdom-swap
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/morphdom-swap/**'
+      - '.github/workflows/morphdom-swap.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/morphdom-swap/**'
+      - '.github/workflows/morphdom-swap.yml'
+  workflow_dispatch:
+
+jobs:
+  test_suite:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+        working-directory: ./src/morphdom-swap
+      - run: npm test
+        working-directory: ./src/morphdom-swap
