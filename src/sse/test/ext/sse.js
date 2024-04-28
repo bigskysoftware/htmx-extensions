@@ -99,6 +99,36 @@ describe('sse extension', function() {
     byId('d2').innerHTML.should.equal('div2 updated')
   })
 
+  it('supports hx-trigger\'s multiple triggers syntax', function() {
+    this.server.respondWith('GET', '/d1', 'div1 updated')
+    this.server.respondWith('GET', '/d2', 'div2 updated')
+    this.server.respondWith('GET', '/d3', 'div3 updated')
+
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" hx-trigger="click, whatever from:body, sse:e1" hx-get="/d1">div1</div>' +
+      '<div id="d2" hx-trigger="keyup, sse:e2, someTrigger" hx-get="/d2">div2</div>' +
+      '<div id="d3" hx-trigger="sse:e3, anotherTrigger" hx-get="/d3">div3</div>' +
+      '</div>')
+
+    this.eventSource.sendEvent('e1')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2')
+    byId('d3').innerHTML.should.equal('div3')
+
+    this.eventSource.sendEvent('e2')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2 updated')
+    byId('d3').innerHTML.should.equal('div3')
+
+    this.eventSource.sendEvent('e3')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2 updated')
+    byId('d3').innerHTML.should.equal('div3 updated')
+  })
+
   it('does not trigger events that arent named', function() {
     this.server.respondWith('GET', '/d1', 'div1 updated')
 
@@ -187,12 +217,43 @@ describe('sse extension', function() {
 
   it('is not listening for events after hx-swap element removed', function() {
     var div = make('<div hx-ext="sse" sse-connect="/foo">' +
-        '<div id="d1" hx-swap="outerHTML" sse-swap="e1">div1</div>' +
+        '<div id="d1" hx-swap="innerHTML" sse-swap="e1, e2">div1</div>' +
+        '<div id="d2" hx-swap="innerHTML" sse-swap="e2">div1</div>' +
         '</div>')
+      this.eventSource._listeners.e1.should.be.lengthOf(1)
+      this.eventSource._listeners.e2.should.be.lengthOf(2)
+      div.removeChild(byId('d1'))
+      this.eventSource.sendEvent('e1', 'Test')
+      this.eventSource.sendEvent('e2', 'Test')
+      this.eventSource._listeners.e1.should.be.empty
+      this.eventSource._listeners.e2.should.be.lengthOf(1)
+      div.removeChild(byId('d2'))
+      this.eventSource.sendEvent('e1', 'Test')
+      this.eventSource.sendEvent('e2', 'Test')
+      this.eventSource._listeners.e1.should.be.empty
+      this.eventSource._listeners.e2.should.be.empty
+  })
+
+  it('is not listening for events after hx-trigger element removed', function() {
+    this.server.respondWith('GET', '/test', function(xhr) {
+      xhr.respond(200, {})
+    })
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" hx-get="/test" hx-target="this" hx-swap="innerHTML" hx-trigger="sse:e1, sse:e2">div1</div>' +
+      '<div id="d2" hx-get="/test" hx-target="this" hx-swap="innerHTML" hx-trigger="sse:e2">div1</div>' +
+      '</div>')
     this.eventSource._listeners.e1.should.be.lengthOf(1)
+    this.eventSource._listeners.e2.should.be.lengthOf(2)
     div.removeChild(byId('d1'))
     this.eventSource.sendEvent('e1', 'Test')
+    this.eventSource.sendEvent('e2', 'Test')
     this.eventSource._listeners.e1.should.be.empty
+    this.eventSource._listeners.e2.should.be.lengthOf(1)
+    div.removeChild(byId('d2'))
+    this.eventSource.sendEvent('e1', 'Test')
+    this.eventSource.sendEvent('e2', 'Test')
+    this.eventSource._listeners.e1.should.be.empty
+    this.eventSource._listeners.e2.should.be.empty
   })
 
   // sse and hx-trigger handlers are distinct
