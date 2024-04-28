@@ -1,0 +1,28 @@
+name: Tests - class-tools
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/class-tools/**'
+      - '.github/workflows/class-tools.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/class-tools/**'
+      - '.github/workflows/class-tools.yml'
+  workflow_dispatch:
+
+jobs:
+  test_suite:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+        working-directory: ./src/class-tools
+      - run: npm test
+        working-directory: ./src/class-tools
