@@ -97,8 +97,8 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       var sseEventNames = sseSwapAttr.split(',')
 
       for (var i = 0; i < sseEventNames.length; i++) {
-        var sseEventName = sseEventNames[i].trim()
-        var listener = function(event) {
+        const sseEventName = sseEventNames[i].trim()
+        const listener = function(event) {
           // If the source is missing then close SSE
           if (maybeCloseSSESource(sourceElement)) {
             return
@@ -137,34 +137,28 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       var internalData = api.getInternalData(sourceElement)
       var source = internalData.sseEventSource
 
-      var triggerAttr = api.getAttributeValue(elt, 'hx-trigger')
-      var sseEventNames = triggerAttr.split(',')
-
-      for (var i = 0; i < sseEventNames.length; i++) {
-        var sseEventName = sseEventNames[i].trim()
-        // Only process hx-triggers for events with the "sse:" prefix
-        if (sseEventName.slice(0, 4) != 'sse:') {
-          continue
+      var triggerSpecs = api.getTriggerSpecs(elt)
+      triggerSpecs.forEach(function(ts) {
+        if (ts.trigger.slice(0, 4) !== 'sse:') {
+          return
         }
 
         var listener = function (event) {
           if (maybeCloseSSESource(sourceElement)) {
             return
           }
-
           if (!api.bodyContains(elt)) {
-            source.removeEventListener(sseEventName.slice(4), listener)
+            source.removeEventListener(ts.trigger.slice(4), listener)
           }
-
           // Trigger events to be handled by the rest of htmx
-          htmx.trigger(elt, sseEventName, event)
+          htmx.trigger(elt, ts.trigger, event)
           htmx.trigger(elt, 'htmx:sseMessage', event)
         }
 
         // Register the new listener
         api.getInternalData(elt).sseEventListener = listener
-        source.addEventListener(sseEventName.slice(4), listener)
-      }
+        source.addEventListener(ts.trigger.slice(4), listener)
+      })
     }
   }
 
