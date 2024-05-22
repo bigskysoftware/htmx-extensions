@@ -113,6 +113,56 @@ Previous versions of htmx used a built-in tag `hx-sse` to implement Server Sent 
 | `hx-sse="swap:<EventName>"`    | `sse-swap="<EventName>"` | Add a new attribute `sse-swap` to any elements that will be swapped in via the SSE extension.  This attribute must be placed **on** or **inside of** the tag containing the `hx-ext` attribute. |
 | `hx-trigger="sse:<EventName>"` | NO CHANGE                | any `hx-trigger` attributes do not need to change.  The extension will identify these attributes and add listeners for any events prefixed with `sse:` |
 
+### Listening to events dispatched by this extension
+
+This extension dispatches several events. You can listen for these events like so:
+
+```javascript
+document.body.addEventListener('htmx:sseBeforeMessage', function (e) {
+  // do something before the event data is swapped in
+})
+```
+
+Each event object has a `detail` field that contains details of the event.
+
+#### `htmx:sseOpen`
+
+This event is dispatched when an SSE connection has been successfully established.
+
+##### Details
+
+* `detail.elt` - The element on which the SSE connection was setup. This is the element which has the `sse-connect` attribute.
+* `detail.source` - The [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) object.
+
+#### `htmx:sseError`
+
+This event is dispatched when an SSE connection could not be established.
+
+##### Details
+
+* `detail.elt` - The element on which the SSE connection was setup. This is the element which has the `sse-connect` attribute.
+* `detail.source` - The [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) object.
+
+#### `htmx:sseBeforeMessage`
+
+This event is dispatched just before the SSE event data is swapped into the DOM.
+
+##### Details
+
+* `detail.elt` - The swap target.
+* `detail.data` - The data sent in the SSE message.
+* `detail.target` - The [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) object.
+
+#### `htmx:sseMessage`
+
+This event is dispatched after the SSE event data has been swapped into the DOM.
+
+##### Details
+
+* `detail.elt` - The swap target.
+* `detail.data` - The data sent in the SSE message.
+* `detail.target` - The [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) object.
+
 ### Additional SSE Resources
 
 * [Wikipedia](https://en.wikipedia.org/wiki/Server-sent_events)
