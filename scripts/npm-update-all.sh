@@ -7,6 +7,7 @@ for dir in $SCRIPT_DIR/../src/*; do
         (
             cd "$dir"
             npm i -D
+            npm update
             cd ../..
         )
     else
