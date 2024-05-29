@@ -140,8 +140,8 @@ This event is dispatched when an SSE connection could not be established.
 
 ##### Details
 
-* `detail.elt` - The element on which the SSE connection was setup. This is the element which has the `sse-connect` attribute.
-* `detail.source` - The [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) object.
+* `detail.error` - The error that occured while creating an EventSource.
+* `detail.source` - The EventSource.
 
 #### `htmx:sseBeforeMessage`
 
