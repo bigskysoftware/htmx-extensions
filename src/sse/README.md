@@ -140,28 +140,24 @@ This event is dispatched when an SSE connection could not be established.
 
 ##### Details
 
-* `detail.error` - The error that occured while creating an EventSource.
-* `detail.source` - The EventSource.
+* `detail.error` - The error that occured while creating an [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource).
+* `detail.source` - The [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource).
 
 #### `htmx:sseBeforeMessage`
 
-This event is dispatched just before the SSE event data is swapped into the DOM.
+This event is dispatched just before the SSE event data is swapped into the DOM. If you don't want to swap call `preventDefault()` on the event. Additionally the `details` field is a [MessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/EventSource/message_event) - this is the event created by [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) when it receives an SSE message.
 
 ##### Details
 
 * `detail.elt` - The swap target.
-* `detail.data` - The data sent in the SSE message.
-* `detail.target` - The [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) object.
 
 #### `htmx:sseMessage`
 
-This event is dispatched after the SSE event data has been swapped into the DOM.
+This event is dispatched after the SSE event data has been swapped into the DOM. The `details` field is a [MessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/EventSource/message_event) - this is the event created by [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) when it receives an SSE message.
 
 ##### Details
 
 * `detail.elt` - The swap target.
-* `detail.data` - The data sent in the SSE message.
-* `detail.target` - The [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) object.
 
 ### Additional SSE Resources
 
