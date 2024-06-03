@@ -46,4 +46,30 @@ describe('method-override extension', function() {
     this.server.respond()
     btn.innerHTML.should.equal('Putted!')
   })
+
+  it('issues a GET request with proper headers', function() {
+    this.server.respondWith('GET', '/test', function(xhr) {
+      should.not.exist(xhr.requestHeaders['X-HTTP-Method-Override'])
+      xhr.method.should.equal('GET')
+      xhr.respond(200, {}, 'Getted!')
+    })
+
+    var btn = make('<button hx-ext="method-override" hx-get="/test">Click Me!</button>')
+    btn.click()
+    this.server.respond()
+    btn.innerHTML.should.equal('Getted!')
+  })
+
+  it('issues a POST request with proper headers', function() {
+    this.server.respondWith('POST', '/test', function(xhr) {
+      should.not.exist(xhr.requestHeaders['X-HTTP-Method-Override'])
+      xhr.method.should.equal('POST')
+      xhr.respond(200, {}, 'Posted!')
+    })
+
+    var btn = make('<button hx-ext="method-override" hx-post="/test">Click Me!</button>')
+    btn.click()
+    this.server.respond()
+    btn.innerHTML.should.equal('Posted!')
+  })
 })
