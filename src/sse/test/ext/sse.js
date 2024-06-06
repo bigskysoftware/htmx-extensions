@@ -1,8 +1,6 @@
 describe('sse extension', function() {
   function mockEventSource() {
     var listeners = {}
-    var wasClosed = false
-    var url
     var mockEventSource = {
       _listeners: listeners,
       removeEventListener: function(name, l) {
@@ -20,6 +18,7 @@ describe('sse extension', function() {
         listeners[message].push(l)
       },
       sendEvent: function(eventName, data) {
+        this.readyState.should.equal(EventSource.OPEN)
         var eventListeners = listeners[eventName]
         if (eventListeners) {
           eventListeners.forEach(function(listener) {
@@ -30,30 +29,52 @@ describe('sse extension', function() {
         }
       },
       close: function() {
-        wasClosed = true
-      },
-      wasClosed: function() {
-        return wasClosed
+        this.readyState = EventSource.CLOSED
       },
       connect: function(url) {
         this.url = url
-      }
+        setTimeout(function() {
+          if (mockEventSource.failConnections) {
+            mockEventSource.readyState = EventSource.CLOSED
+            if (typeof mockEventSource.onerror === 'function') {
+              mockEventSource.onerror('Simulated EventSource connection failure')
+            }
+          } else {
+            mockEventSource.readyState = EventSource.OPEN
+            if (typeof mockEventSource.onopen === 'function') {
+              mockEventSource.onopen()
+            }
+          }
+        }, 0)
+      },
+      simulateConnectionError: function() {
+        this.close()
+        if (typeof this.onerror === "function") {
+          this.onerror()
+        }
+      },
+      /** @type {EventSource.CONNECTING|EventSource.OPEN|EventSource.CLOSED|0|1|2} */
+      readyState: EventSource.CONNECTING,
+      failConnections: false,
     }
     return mockEventSource
   }
 
   beforeEach(function() {
     this.server = makeServer()
-    var eventSource = mockEventSource()
-    this.eventSource = eventSource
+    this.clock = sinon.useFakeTimers();
+    var test = this
     clearWorkArea()
     htmx.createEventSource = function(url) {
+      var eventSource = mockEventSource()
+      test.eventSource = eventSource
       eventSource.connect(url)
       return eventSource
     }
   })
   afterEach(function() {
     this.server.restore()
+    this.clock.restore();
     clearWorkArea()
   })
 
@@ -63,6 +84,7 @@ describe('sse extension', function() {
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
             '</div>' +
             '</div>')
+    this.clock.tick(1)
 
     this.eventSource.url.should.be.equal('/foo');
     this.eventSource._listeners.e1.should.be.lengthOf(1)
@@ -74,6 +96,7 @@ describe('sse extension', function() {
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
             '</div>' +
             '</div>');
+    this.clock.tick(1)
 
     this.eventSource.url.should.be.equal('/foo');
     (this.eventSource._listeners.e1 == undefined).should.be.true
@@ -87,6 +110,7 @@ describe('sse extension', function() {
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
             '<div id="d2" hx-trigger="sse:e2" hx-get="/d2">div2</div>' +
             '</div>')
+    this.clock.tick(1)
 
     this.eventSource.sendEvent('e1')
     this.server.respond()
@@ -109,6 +133,7 @@ describe('sse extension', function() {
       '<div id="d2" hx-trigger="keyup, sse:e2, someTrigger" hx-get="/d2">div2</div>' +
       '<div id="d3" hx-trigger="sse:e3, anotherTrigger" hx-get="/d3">div3</div>' +
       '</div>')
+    this.clock.tick(1)
 
     this.eventSource.sendEvent('e1')
     this.server.respond()
@@ -135,6 +160,7 @@ describe('sse extension', function() {
     var div = make('<div hx-ext="sse" sse-connect="/foo">' +
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
             '</div>')
+    this.clock.tick(1)
 
     this.eventSource.sendEvent('foo')
     this.server.respond()
@@ -154,6 +180,7 @@ describe('sse extension', function() {
 
     var div = make('<div hx-ext="sse" sse-connect="/foo"></div>' +
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>')
+    this.clock.tick(1)
 
     this.eventSource.sendEvent('foo')
     this.server.respond()
@@ -173,9 +200,10 @@ describe('sse extension', function() {
     var div = make('<div hx-get="/test" hx-swap="outerHTML" hx-ext="sse" sse-connect="/foo">' +
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
             '</div>')
+    this.clock.tick(1)
     div.click()
     this.server.respond()
-    this.eventSource.wasClosed().should.equal(true)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
   })
 
   it('is closed after removal, hx-swap', function() {
@@ -183,36 +211,40 @@ describe('sse extension', function() {
     var div = make('<div hx-get="/test" hx-swap="outerHTML" hx-ext="sse" sse-connect="/foo">' +
             '<div id="d1" hx-swap="e1" hx-get="/d1">div1</div>' +
             '</div>')
+    this.clock.tick(1)
     div.click()
     this.server.respond()
-    this.eventSource.wasClosed().should.equal(true)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
   })
 
   it('is closed after removal with no close and activity, hx-trigger', function() {
     var div = make('<div hx-get="/test" hx-swap="outerHTML" hx-ext="sse" sse-connect="/foo">' +
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
             '</div>')
+    this.clock.tick(1)
     div.parentElement.removeChild(div)
     this.eventSource.sendEvent('e1')
-    this.eventSource.wasClosed().should.equal(true)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
   })
 
   it('is closed after close message from server', function() {
     var div = make('<div hx-ext="sse" sse-connect="/foo" sse-close="close">' +
             '<div id="d1" sse-swap="e1"></div>' +
             '</div>');
-    this.eventSource.wasClosed().should.equal(false);
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.OPEN);
     this.eventSource.sendEvent("close");
-    this.eventSource.wasClosed().should.equal(true);
+    this.eventSource.readyState.should.equal(EventSource.CLOSED);
   })
 
   it('is closed after close message from server in nested content', function() {
     var div = make('<div hx-ext="sse"><div sse-connect="/foo" sse-close="close">' +
             '<div id="d1" sse-swap="e1"></div>' +
             '</div></div>');
-    this.eventSource.wasClosed().should.equal(false);
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.OPEN);
     this.eventSource.sendEvent("close");
-    this.eventSource.wasClosed().should.equal(true);
+    this.eventSource.readyState.should.equal(EventSource.CLOSED);
   })
 
   it('is not listening for events after hx-swap element removed', function() {
@@ -220,6 +252,7 @@ describe('sse extension', function() {
         '<div id="d1" hx-swap="innerHTML" sse-swap="e1, e2">div1</div>' +
         '<div id="d2" hx-swap="innerHTML" sse-swap="e2">div1</div>' +
         '</div>')
+    this.clock.tick(1)
       this.eventSource._listeners.e1.should.be.lengthOf(1)
       this.eventSource._listeners.e2.should.be.lengthOf(2)
       div.removeChild(byId('d1'))
@@ -242,6 +275,7 @@ describe('sse extension', function() {
       '<div id="d1" hx-get="/test" hx-target="this" hx-swap="innerHTML" hx-trigger="sse:e1, sse:e2">div1</div>' +
       '<div id="d2" hx-get="/test" hx-target="this" hx-swap="innerHTML" hx-trigger="sse:e2">div1</div>' +
       '</div>')
+    this.clock.tick(1)
     this.eventSource._listeners.e1.should.be.lengthOf(1)
     this.eventSource._listeners.e2.should.be.lengthOf(2)
     div.removeChild(byId('d1'))
@@ -261,9 +295,10 @@ describe('sse extension', function() {
     var div = make('<div hx-get="/test" hx-swap="outerHTML" hx-ext="sse" sse-connect="/foo">' +
             '<div id="d1" sse-swap="e1" hx-get="/d1">div1</div>' +
             '</div>')
+    this.clock.tick(1)
     div.parentElement.removeChild(div)
     this.eventSource.sendEvent('e1')
-    this.eventSource.wasClosed().should.equal(true)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
   })
 
   it('swaps content properly on SSE swap', function() {
@@ -271,6 +306,7 @@ describe('sse extension', function() {
             '  <div id="d1" sse-swap="e1"></div>\n' +
             '  <div id="d2" sse-swap="e2"></div>\n' +
             '</div>\n')
+    this.clock.tick(1)
     byId('d1').innerText.should.equal('')
     byId('d2').innerText.should.equal('')
     this.eventSource.sendEvent('e1', 'Event 1')
@@ -286,6 +322,7 @@ describe('sse extension', function() {
             '<div id="d1" sse-swap="e1" hx-swap="outerHTML"></div>\n' +
             '</div>\n'
     )
+    this.clock.tick(1)
 
     this.eventSource.sendEvent('e1', '<div id="d2" sse-swap="e2"></div>')
     this.eventSource.sendEvent('e2', 'Event 2')
@@ -297,6 +334,7 @@ describe('sse extension', function() {
             '<div id="d1" sse-connect="/event_stream" sse-swap="e1">div1</div>\n' +
             '</div>\n'
     )
+    this.clock.tick(1)
     this.eventSource.sendEvent('e1', 'Event 1')
     byId('d1').innerText.should.equal('Event 1')
   })
@@ -305,6 +343,7 @@ describe('sse extension', function() {
     var div = make('<div hx-ext="sse" sse-connect="/event_stream" >\n' +
             '<div id="d1" sse-swap="e1"></div>\n' +
             '</div>');
+    this.clock.tick(1);
 
     (byId('d1')['htmx-internal-data'].sseEventSource == undefined).should.be.true
 
@@ -316,6 +355,7 @@ describe('sse extension', function() {
 
   it('triggers events with naked hx-trigger', function() {
     var div = make( '<div hx-ext="sse"><div sse-connect="/foo"><div id="d2" hx-trigger="sse:e2">div2</div></div></div>')
+    this.clock.tick(1)
 
     let triggerCounter = 0
     div.addEventListener("htmx:trigger", () => triggerCounter++)
@@ -333,9 +373,11 @@ describe('sse extension', function() {
     this.server.respondWith('GET', '/d2', 'div2 updated')
 
     var div = make('<div hx-ext="sse" hx-get="/d1"></div>')
+    this.clock.tick(1)
     div.click()
 
     this.server.respond()
+    this.clock.tick(1)
     this.eventSource.sendEvent('e2')
     this.server.respond()
 
@@ -344,6 +386,7 @@ describe('sse extension', function() {
 
   it('creates an eventsource on elements with sse-connect', function() {
     var div = make('<div hx-ext="sse"><div id="d1"sse-connect="/event_stream"></div></div>');
+    this.clock.tick(1);
 
     (byId('d1')['htmx-internal-data'].sseEventSource == undefined).should.be.false
   })
@@ -358,6 +401,7 @@ describe('sse extension', function() {
     htmx.on('htmx:sseBeforeMessage', handle)
 
     var div = make('<div hx-ext="sse" sse-connect="/event_stream" sse-swap="e1"></div>')
+    this.clock.tick(1)
 
     this.eventSource.sendEvent('e1', '<div id="d1"></div>')
 
@@ -377,6 +421,7 @@ describe('sse extension', function() {
     htmx.on('htmx:sseBeforeMessage', handle)
 
     var div = make('<div hx-ext="sse" sse-connect="/event_stream" sse-swap="e1"><div id="d1">div1</div></div>')
+    this.clock.tick(1)
 
     this.eventSource.sendEvent('e1', '<div id="d1">replaced</div>')
 
@@ -397,6 +442,7 @@ describe('sse extension', function() {
     htmx.on('htmx:sseMessage', handle)
 
     var div = make('<div hx-ext="sse" sse-connect="/event_stream" sse-swap="e1"><div id="d1">div1</div></div>')
+    this.clock.tick(1)
 
     this.eventSource.sendEvent('e1', '<div id="d1">replaced</div>')
 
@@ -404,5 +450,210 @@ describe('sse extension', function() {
     byId('d1').innerHTML.should.equal('replaced')
 
     htmx.off('htmx:sseMessage', handle)
+  })
+
+  it('handles sse reconnection', function() {
+    this.server.respondWith('GET', '/d1', 'div1 updated')
+    this.server.respondWith('GET', '/d2', 'div2 updated')
+
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
+      '<div id="d2" hx-trigger="sse:e2" hx-get="/d2">div2</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    this.eventSource.sendEvent('e1')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2')
+
+    var oldEventSource = this.eventSource
+    this.eventSource.should.equal(oldEventSource)
+
+    var sseErrorCalled = false
+    div.addEventListener("htmx:sseError", function(){
+      sseErrorCalled = true
+    })
+
+    this.eventSource.simulateConnectionError()
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+
+    this.clock.tick(500)
+    sseErrorCalled.should.equal(true)
+    this.eventSource.should.not.equal(oldEventSource)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.OPEN)
+
+    this.eventSource.sendEvent('e2')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2 updated')
+  })
+
+  it('reconnection retry timeout properly increases over attempts', function() {
+    this.server.respondWith('GET', '/d1', 'div1 updated')
+    this.server.respondWith('GET', '/d2', 'div2 updated')
+
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
+      '<div id="d2" hx-trigger="sse:e2" hx-get="/d2">div2</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    this.eventSource.sendEvent('e1')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2')
+
+    var oldEventSource = this.eventSource
+    this.eventSource.should.equal(oldEventSource)
+
+    this.eventSource.simulateConnectionError()
+    this.clock.tick(300)
+    this.eventSource.should.equal(oldEventSource)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(200)
+    this.eventSource.should.not.equal(oldEventSource)
+    this.eventSource.failConnections = true
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+
+    this.clock.tick(800)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(200)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.eventSource.failConnections = true
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+
+    this.clock.tick(1950)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(50)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.eventSource.failConnections = true
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+
+    this.clock.tick(3950)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(50)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.eventSource.failConnections = true
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+
+    this.clock.tick(7999)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.eventSource.failConnections = true
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+
+    this.clock.tick(15999)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.eventSource.failConnections = true
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+
+    this.clock.tick(31999)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.eventSource.failConnections = true
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+
+    this.clock.tick(63999)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.eventSource.failConnections = true
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+
+    // Doesn't go higher than 64s
+    this.clock.tick(63999)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.eventSource.failConnections = true
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+
+    this.clock.tick(63999)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.OPEN)
+
+    this.eventSource.sendEvent('e2')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2 updated')
+  })
+
+  it('reconnection retry timeout properly resets on successful connection', function() {
+    this.server.respondWith('GET', '/d1', 'div1 updated')
+    this.server.respondWith('GET', '/d2', 'div2 updated')
+
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
+      '<div id="d2" hx-trigger="sse:e2" hx-get="/d2">div2</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    this.eventSource.sendEvent('e1')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2')
+
+    var oldEventSource = this.eventSource
+    this.eventSource.should.equal(oldEventSource)
+
+    this.eventSource.simulateConnectionError()
+    // Reconnection delays starts at 500ms
+    this.clock.tick(300)
+    this.eventSource.should.equal(oldEventSource)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(200)
+    this.eventSource.should.not.equal(oldEventSource)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.eventSource.failConnections = true
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    oldEventSource = this.eventSource
+
+    // Delay increases to 1s on the second attempt
+    this.clock.tick(800)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.eventSource.should.equal(oldEventSource)
+    this.clock.tick(200)
+    this.eventSource.should.not.equal(oldEventSource)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.OPEN)
+    oldEventSource = this.eventSource
+
+    // Delay resets to minimum (500ms) after a successful connection
+    this.eventSource.simulateConnectionError()
+    this.clock.tick(499)
+    this.eventSource.should.equal(oldEventSource)
+    this.eventSource.readyState.should.equal(EventSource.CLOSED)
+    this.clock.tick(1)
+    this.eventSource.should.not.equal(oldEventSource)
+    this.eventSource.readyState.should.equal(EventSource.CONNECTING)
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.OPEN)
+
+    this.eventSource.sendEvent('e2')
+    this.server.respond()
+    byId('d1').innerHTML.should.equal('div1 updated')
+    byId('d2').innerHTML.should.equal('div2 updated')
   })
 })
