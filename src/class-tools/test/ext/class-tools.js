@@ -57,6 +57,14 @@ describe('class-tools extension', function() {
     }, 100)
   })
 
+  it('cleans up child with apply-parent-classes properly', function(done) {
+    var div = make('<div class="foo bar">Click Me!<div id="d2" hx-ext="class-tools" apply-parent-classes="remove bar"></div></div>')
+    setTimeout(function() {
+      should.not.exist(byId('d2'))
+      done()
+    }, 100)
+  })
+
   it('extension can be on parent', function(done) {
     var div = make('<div hx-ext="class-tools"><div id="d1" classes="add c1">Click Me!</div></div>')
     should.equal(div.classList.length, 0)
