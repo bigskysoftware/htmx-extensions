@@ -221,6 +221,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
     if (closeAttribute) {
       // close eventsource when this message is received
       source.addEventListener(closeAttribute, function() {
+        api.triggerEvent(elt, 'htmx:sseClose', { source })
         source.close()
       });
     }
