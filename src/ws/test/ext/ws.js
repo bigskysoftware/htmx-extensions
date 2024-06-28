@@ -618,6 +618,61 @@ describe('web-sockets extension', function() {
     this.messages[1].should.contains('"action":"B"')
   })
 
+  it('sends data to the server with external non-htmx form + submit input & array multiple values', function() {
+    make('<div hx-ext="ws" ws-connect="ws://localhost:8080">' +
+            '<form ws-send id="form">' +
+            '<input type="hidden" name="foo[]" value="bar">' +
+            '<input type="hidden" name="foo[]" value="baz">' +
+            '</form>' +
+            '</div>' +
+            '<input id="b1" form="form" type="submit" name="action" value="A">' +
+            '<input id="b2" form="form" type="submit" name="action" value="B">')
+    this.tickMock()
+
+    byId('b1').click()
+
+    this.tickMock()
+
+    this.messages.length.should.equal(1)
+    this.messages[0].should.contains('"foo[]":["bar","baz"]')
+    this.messages[0].should.contains('"action":"A"')
+
+    byId('b2').click()
+
+    this.tickMock()
+
+    this.messages.length.should.equal(2)
+    this.messages[1].should.contains('"foo[]":["bar","baz"]')
+    this.messages[1].should.contains('"action":"B"')
+  })
+
+  it('sends data to the server with external non-htmx form + submit input & array single value', function() {
+    make('<div hx-ext="ws" ws-connect="ws://localhost:8080">' +
+            '<form ws-send id="form">' +
+            '<input type="hidden" name="foo[]" value="bar">' +
+            '</form>' +
+            '</div>' +
+            '<input id="b1" form="form" type="submit" name="action" value="A">' +
+            '<input id="b2" form="form" type="submit" name="action" value="B">')
+    this.tickMock()
+
+    byId('b1').click()
+
+    this.tickMock()
+
+    this.messages.length.should.equal(1)
+    this.messages[0].should.contains('"foo[]":["bar"]')
+    this.messages[0].should.contains('"action":"A"')
+
+    byId('b2').click()
+
+    this.tickMock()
+
+    this.messages.length.should.equal(2)
+    this.messages[1].should.contains('"foo[]":["bar"]')
+    this.messages[1].should.contains('"action":"B"')
+  })
+
   describe('Send immediately', function() {
     function checkCallForWsBeforeSend(spy, wrapper, message, target) {
       // Utility function to always check the same for htmx:wsBeforeSend caught by a spy
