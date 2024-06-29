@@ -1,7 +1,7 @@
 {
   "name": "htmx-ext-sse",
   "main": "sse.js",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "scripts": {
     "lint": "eslint test/ext test",
     "lint-fix": "eslint test/ext test --fix",
