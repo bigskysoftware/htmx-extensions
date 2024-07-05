@@ -20,5 +20,6 @@
     "mocha-chrome": "https://github.com/Telroshan/mocha-chrome",
     "sinon": "^9.2.4",
     "htmx": "https://github.com/bigskysoftware/htmx#v2.0.0-beta4"
-  }
+  },
+  "license": "0BSD"
 }
