@@ -9,6 +9,8 @@
             max-width: 768px;
             margin: auto;
             padding: 4px 4px;
+            background-color: var(--bgColor);
+            color: var(--textColor);
         }
 
         .blue {
@@ -40,6 +42,9 @@
             padding: 12px;
             border-radius: 4px;
             margin-bottom: 12px;
+            background-color: var(--bgColor);
+            color: var(--textColor);
+            border-color: var(--textColor);
         }
 
         main {
@@ -60,6 +65,28 @@
         tr td {
             padding: 12px;
             line-height: 1.8em;
+        }
+
+        a {
+            color: var(--linkColor);
+        }
+
+        a:hover {
+            opacity: 0.6;
+        }
+
+        :root {
+            --bgColor: #ffffff;
+            --textColor: #1f1f1f;
+            --linkColor: #3366cc;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bgColor: #1f1f1f;
+                --textColor: #ffffff;
+                --linkColor: #5b96d5;
+            }
         }
     </style>
     <script src="_hyperscript.min.js"></script>
