@@ -155,6 +155,28 @@ This event is dispatched just before the SSE event data is swapped into the DOM.
 
 This event is dispatched after the SSE event data has been swapped into the DOM. The `details` field is a [MessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/EventSource/message_event) - this is the event created by [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) when it receives an SSE message.
 
+#### `htmx:sseClose`
+
+This event is dispatched in three different closing scenario. To control for the scenario the user can control for the evt.detail.sseclose property.
+
+```javascript
+document.body.addEventListener('htmx:sseClose', function (e) {
+    const reason = e.detail.type
+    switch(reason) {
+        case "nodeMissing":
+            // Parent node is missing and therefore connection was closed
+            ...
+        case "nodeRemoved":
+            // Parent node replacement caused closing of connection 
+            ...
+        case "message":
+            // connection was closed due to reception of message sse-close 
+            ...
+            
+    }
+})
+```
+
 ##### Details
 
 * `detail.elt` - The swap target.
