@@ -5,30 +5,34 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
 
 */
 
-(function() {
+(function () {
   /** @type {import("../htmx").HtmxInternalApi} */
-  var api
+  var api;
 
-  htmx.defineExtension('sse', {
-
+  htmx.defineExtension("sse", {
     /**
      * Init saves the provided reference to the internal HTMX API.
      *
      * @param {import("../htmx").HtmxInternalApi} api
      * @returns void
      */
-    init: function(apiRef) {
+    init: function (apiRef) {
       // store a reference to the internal API.
-      api = apiRef
+      api = apiRef;
 
       // set a function in the public API for creating new EventSource objects
       if (htmx.createEventSource == undefined) {
-        htmx.createEventSource = createEventSource
+        htmx.createEventSource = createEventSource;
       }
     },
 
-    getSelectors: function() {
-      return ['[sse-connect]', '[data-sse-connect]', '[sse-swap]', '[data-sse-swap]']
+    getSelectors: function () {
+      return [
+        "[sse-connect]",
+        "[data-sse-connect]",
+        "[sse-swap]",
+        "[data-sse-swap]",
+      ];
     },
 
     /**
@@ -38,24 +42,28 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
      * @param {Event} evt
      * @returns void
      */
-    onEvent: function(name, evt) {
-      var parent = evt.target || evt.detail.elt
+    onEvent: function (name, evt) {
+      var parent = evt.target || evt.detail.elt;
       switch (name) {
-        case 'htmx:beforeCleanupElement':
-          var internalData = api.getInternalData(parent)
+        case "htmx:beforeCleanupElement":
+          var internalData = api.getInternalData(parent);
           // Try to remove remove an EventSource when elements are removed
           if (internalData.sseEventSource) {
-            internalData.sseEventSource.close()
+            api.triggerEvent(elt, "htmx:sseClose", {
+              source,
+              type: "nodeRemoved",
+            });
+            internalData.sseEventSource.close();
           }
 
-          return
+          return;
 
         // Try to create EventSources when elements are processed
-        case 'htmx:afterProcessNode':
-          ensureEventSourceOnElement(parent)
+        case "htmx:afterProcessNode":
+          ensureEventSourceOnElement(parent);
       }
-    }
-  })
+    },
+  });
 
   /// ////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -69,7 +77,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
    * @returns EventSource
    */
   function createEventSource(url) {
-    return new EventSource(url, { withCredentials: true })
+    return new EventSource(url, { withCredentials: true });
   }
 
   /**
@@ -81,84 +89,84 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
    */
   function registerSSE(elt) {
     // Add message handlers for every `sse-swap` attribute
-    if (api.getAttributeValue(elt, 'sse-swap')) {
+    if (api.getAttributeValue(elt, "sse-swap")) {
       // Find closest existing event source
-      var sourceElement = api.getClosestMatch(elt, hasEventSource)
+      var sourceElement = api.getClosestMatch(elt, hasEventSource);
       if (sourceElement == null) {
         // api.triggerErrorEvent(elt, "htmx:noSSESourceError")
-        return null // no eventsource in parentage, orphaned element
+        return null; // no eventsource in parentage, orphaned element
       }
 
       // Set internalData and source
-      var internalData = api.getInternalData(sourceElement)
-      var source = internalData.sseEventSource
+      var internalData = api.getInternalData(sourceElement);
+      var source = internalData.sseEventSource;
 
-      var sseSwapAttr = api.getAttributeValue(elt, 'sse-swap')
-      var sseEventNames = sseSwapAttr.split(',')
+      var sseSwapAttr = api.getAttributeValue(elt, "sse-swap");
+      var sseEventNames = sseSwapAttr.split(",");
 
       for (var i = 0; i < sseEventNames.length; i++) {
-        const sseEventName = sseEventNames[i].trim()
-        const listener = function(event) {
+        const sseEventName = sseEventNames[i].trim();
+        const listener = function (event) {
           // If the source is missing then close SSE
           if (maybeCloseSSESource(sourceElement)) {
-            return
+            return;
           }
 
           // If the body no longer contains the element, remove the listener
           if (!api.bodyContains(elt)) {
-            source.removeEventListener(sseEventName, listener)
-            return
+            source.removeEventListener(sseEventName, listener);
+            return;
           }
 
           // swap the response into the DOM and trigger a notification
-          if (!api.triggerEvent(elt, 'htmx:sseBeforeMessage', event)) {
-            return
+          if (!api.triggerEvent(elt, "htmx:sseBeforeMessage", event)) {
+            return;
           }
-          swap(elt, event.data)
-          api.triggerEvent(elt, 'htmx:sseMessage', event)
-        }
+          swap(elt, event.data);
+          api.triggerEvent(elt, "htmx:sseMessage", event);
+        };
 
         // Register the new listener
-        api.getInternalData(elt).sseEventListener = listener
-        source.addEventListener(sseEventName, listener)
+        api.getInternalData(elt).sseEventListener = listener;
+        source.addEventListener(sseEventName, listener);
       }
     }
 
     // Add message handlers for every `hx-trigger="sse:*"` attribute
-    if (api.getAttributeValue(elt, 'hx-trigger')) {
+    if (api.getAttributeValue(elt, "hx-trigger")) {
       // Find closest existing event source
-      var sourceElement = api.getClosestMatch(elt, hasEventSource)
+      var sourceElement = api.getClosestMatch(elt, hasEventSource);
       if (sourceElement == null) {
         // api.triggerErrorEvent(elt, "htmx:noSSESourceError")
-        return null // no eventsource in parentage, orphaned element
+        return null; // no eventsource in parentage, orphaned element
       }
 
       // Set internalData and source
-      var internalData = api.getInternalData(sourceElement)
-      var source = internalData.sseEventSource
+      var internalData = api.getInternalData(sourceElement);
+      var source = internalData.sseEventSource;
 
-      var triggerSpecs = api.getTriggerSpecs(elt)
-      triggerSpecs.forEach(function(ts) {
-        if (ts.trigger.slice(0, 4) !== 'sse:') {
-          return
+      var triggerSpecs = api.getTriggerSpecs(elt);
+      triggerSpecs.forEach(function (ts) {
+        if (ts.trigger.slice(0, 4) !== "sse:") {
+          return;
         }
 
         var listener = function (event) {
           if (maybeCloseSSESource(sourceElement)) {
-            return
+            return;
           }
           if (!api.bodyContains(elt)) {
-            source.removeEventListener(ts.trigger.slice(4), listener)
+            source.removeEventListener(ts.trigger.slice(4), listener);
           }
           // Trigger events to be handled by the rest of htmx
-          htmx.trigger(elt, ts.trigger, event)
-          htmx.trigger(elt, 'htmx:sseMessage', event)
-        }
+          htmx.trigger(elt, ts.trigger, event);
+          htmx.trigger(elt, "htmx:sseMessage", event);
+        };
 
         // Register the new listener
-        api.getInternalData(elt).sseEventListener = listener
-        source.addEventListener(ts.trigger.slice(4), listener)
-      })
+        api.getInternalData(elt).sseEventListener = listener;
+        source.addEventListener(ts.trigger.slice(4), listener);
+      });
     }
   }
 
@@ -172,57 +180,58 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
    */
   function ensureEventSourceOnElement(elt, retryCount) {
     if (elt == null) {
-      return null
+      return null;
     }
 
     // handle extension source creation attribute
-    if (api.getAttributeValue(elt, 'sse-connect')) {
-      var sseURL = api.getAttributeValue(elt, 'sse-connect')
+    if (api.getAttributeValue(elt, "sse-connect")) {
+      var sseURL = api.getAttributeValue(elt, "sse-connect");
       if (sseURL == null) {
-        return
+        return;
       }
 
-      ensureEventSource(elt, sseURL, retryCount)
+      ensureEventSource(elt, sseURL, retryCount);
     }
 
-    registerSSE(elt)
+    registerSSE(elt);
   }
 
   function ensureEventSource(elt, url, retryCount) {
-    var source = htmx.createEventSource(url)
+    var source = htmx.createEventSource(url);
 
-    source.onerror = function(err) {
+    source.onerror = function (err) {
       // Log an error event
-      api.triggerErrorEvent(elt, 'htmx:sseError', { error: err, source })
+      api.triggerErrorEvent(elt, "htmx:sseError", { error: err, source });
 
       // If parent no longer exists in the document, then clean up this EventSource
       if (maybeCloseSSESource(elt)) {
-        return
+        return;
       }
 
       // Otherwise, try to reconnect the EventSource
       if (source.readyState === EventSource.CLOSED) {
-        retryCount = retryCount || 0
-        var timeout = Math.random() * (2 ^ retryCount) * 500
-        window.setTimeout(function() {
-          ensureEventSourceOnElement(elt, Math.min(7, retryCount + 1))
-        }, timeout)
+        retryCount = retryCount || 0;
+        var timeout = Math.random() * (2 ^ retryCount) * 500;
+        window.setTimeout(function () {
+          ensureEventSourceOnElement(elt, Math.min(7, retryCount + 1));
+        }, timeout);
       }
-    }
+    };
 
-    source.onopen = function(evt) {
-      api.triggerEvent(elt, 'htmx:sseOpen', { source })
-    }
+    source.onopen = function (evt) {
+      api.triggerEvent(elt, "htmx:sseOpen", { source });
+    };
 
-    api.getInternalData(elt).sseEventSource = source
-
+    api.getInternalData(elt).sseEventSource = source;
 
     var closeAttribute = api.getAttributeValue(elt, "sse-close");
     if (closeAttribute) {
       // close eventsource when this message is received
-      source.addEventListener(closeAttribute, function() {
-        api.triggerEvent(elt, 'htmx:sseClose', { source })
-        source.close()
+      source.addEventListener(closeAttribute, function () {
+        api.triggerEvent(elt, "htmx:sseClose", {
+          type: "message",
+        });
+        source.close();
       });
     }
   }
@@ -236,33 +245,35 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
    */
   function maybeCloseSSESource(elt) {
     if (!api.bodyContains(elt)) {
-      var source = api.getInternalData(elt).sseEventSource
+      var source = api.getInternalData(elt).sseEventSource;
       if (source != undefined) {
-        source.close()
+        api.triggerEvent(elt, "htmx:sseClose", {
+          source,
+          type: "nodeMissing",
+        });
+        source.close();
         // source = null
-        return true
+        return true;
       }
     }
-    return false
+    return false;
   }
-
 
   /**
    * @param {HTMLElement} elt
    * @param {string} content
    */
   function swap(elt, content) {
-    api.withExtensions(elt, function(extension) {
-      content = extension.transformResponse(content, null, elt)
-    })
+    api.withExtensions(elt, function (extension) {
+      content = extension.transformResponse(content, null, elt);
+    });
 
-    var swapSpec = api.getSwapSpecification(elt)
-    var target = api.getTarget(elt)
-    api.swap(target, content, swapSpec)
+    var swapSpec = api.getSwapSpecification(elt);
+    var target = api.getTarget(elt);
+    api.swap(target, content, swapSpec);
   }
-
 
   function hasEventSource(node) {
-    return api.getInternalData(node).sseEventSource != null
+    return api.getInternalData(node).sseEventSource != null;
   }
-})()
+})();
