@@ -74,7 +74,7 @@ describe('safe-nonce extension tests', function() {
     // safe-nonce overrides inlineScriptNonce function and requires the server to respond with HX-Nonce header instead
     window.i = 0 // set count to 0
     this.server.respondWith('GET', '/test', [200, { 'HX-Nonce': '6p1zabP/K+va3O8bi2yydg==' }, '<script nonce="6p1zabP/K+va3O8bi2yydg==">console.trace(); window.i++</script>'])
-    htmx.config.SafeInlineScriptNonce = 'nonce'
+    htmx.config.safeInlineScriptNonce = 'nonce'
     var div = make('<div hx-ext="safe-nonce" hx-get="/test" hx-swap="innerHTML settle:5ms"/>')
     div.click()
     this.server.respond()
