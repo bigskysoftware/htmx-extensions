@@ -210,17 +210,29 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
 
       // Otherwise, try to reconnect the EventSource
       if (source.readyState === EventSource.CLOSED) {
-        retryCount = retryCount || 0;
-        var timeout = Math.random() * (2 ^ retryCount) * 500;
-        window.setTimeout(function () {
-          ensureEventSourceOnElement(elt, Math.min(7, retryCount + 1));
-        }, timeout);
+        retryCount = retryCount || 0
+        retryCount = Math.max(Math.min(retryCount * 2, 128), 1)
+        var timeout = retryCount * 500
+        window.setTimeout(function() {
+          ensureEventSourceOnElement(elt, retryCount)
+        }, timeout)
       }
     };
 
-    source.onopen = function (evt) {
-      api.triggerEvent(elt, "htmx:sseOpen", { source });
-    };
+
+    source.onopen = function(evt) {
+      api.triggerEvent(elt, 'htmx:sseOpen', { source })
+
+      if (retryCount && retryCount > 0) {
+        const childrenToFix = elt.querySelectorAll("[sse-swap], [data-sse-swap], [hx-trigger], [data-hx-trigger]")
+        for (let i = 0; i < childrenToFix.length; i++) {
+          registerSSE(childrenToFix[i])
+        }
+        // We want to increase the reconnection delay for consecutive failed attempts only
+        retryCount = 0
+      }
+    }
+
 
     api.getInternalData(elt).sseEventSource = source;
 
