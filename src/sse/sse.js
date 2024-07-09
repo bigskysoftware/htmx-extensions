@@ -49,11 +49,11 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
           var internalData = api.getInternalData(parent);
           // Try to remove remove an EventSource when elements are removed
           if (internalData.sseEventSource) {
-            api.triggerEvent(elt, "htmx:sseClose", {
-              source,
-              type: "nodeRemoved",
+            api.triggerEvent(parent, "htmx:sseClose", {
+              type: "nodeReplaced",
             });
             internalData.sseEventSource.close();
+            
           }
 
           return;
@@ -229,6 +229,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       // close eventsource when this message is received
       source.addEventListener(closeAttribute, function () {
         api.triggerEvent(elt, "htmx:sseClose", {
+          source,
           type: "message",
         });
         source.close();

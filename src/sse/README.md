@@ -166,7 +166,7 @@ document.body.addEventListener('htmx:sseClose', function (e) {
         case "nodeMissing":
             // Parent node is missing and therefore connection was closed
             ...
-        case "nodeRemoved":
+        case "nodeReplaced":
             // Parent node replacement caused closing of connection 
             ...
         case "message":

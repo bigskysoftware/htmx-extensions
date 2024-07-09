@@ -46,6 +46,7 @@ describe('sse extension', function() {
     this.server = makeServer()
     var eventSource = mockEventSource()
     this.eventSource = eventSource
+    this.closeType = ""
     clearWorkArea()
     htmx.createEventSource = function(url) {
       eventSource.connect(url)
@@ -173,9 +174,14 @@ describe('sse extension', function() {
     var div = make('<div hx-get="/test" hx-swap="outerHTML" hx-ext="sse" sse-connect="/foo">' +
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
             '</div>')
+    htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type 
+    })
     div.click()
+
     this.server.respond()
     this.eventSource.wasClosed().should.equal(true)
+    this.closeType.should.equal("nodeReplaced")
   })
 
   it('is closed after removal, hx-swap', function() {
@@ -183,9 +189,15 @@ describe('sse extension', function() {
     var div = make('<div hx-get="/test" hx-swap="outerHTML" hx-ext="sse" sse-connect="/foo">' +
             '<div id="d1" hx-swap="e1" hx-get="/d1">div1</div>' +
             '</div>')
+    
+    htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type
+    })
     div.click()
+
     this.server.respond()
     this.eventSource.wasClosed().should.equal(true)
+    this.closeType.should.equal("nodeReplaced")
   })
 
   it('is closed after removal with no close and activity, hx-trigger', function() {
@@ -193,8 +205,14 @@ describe('sse extension', function() {
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
             '</div>')
     div.parentElement.removeChild(div)
+  
+    htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type
+    })
+    
     this.eventSource.sendEvent('e1')
     this.eventSource.wasClosed().should.equal(true)
+    this.closeType.should.equal("nodeMissing")
   })
 
   it('is closed after close message from server', function() {
@@ -202,8 +220,12 @@ describe('sse extension', function() {
             '<div id="d1" sse-swap="e1"></div>' +
             '</div>');
     this.eventSource.wasClosed().should.equal(false);
+    htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type
+    })
     this.eventSource.sendEvent("close");
     this.eventSource.wasClosed().should.equal(true);
+    this.closeType.should.equal("message")
   })
 
   it('is closed after close message from server in nested content', function() {
@@ -211,8 +233,30 @@ describe('sse extension', function() {
             '<div id="d1" sse-swap="e1"></div>' +
             '</div></div>');
     this.eventSource.wasClosed().should.equal(false);
+    htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type
+    })
+
     this.eventSource.sendEvent("close");
     this.eventSource.wasClosed().should.equal(true);
+    this.closeType.should.equal("message")
+  })
+  it('is closed after close message from server, non-nested', function(){
+    var div = make(`<p
+        hx-ext="sse"
+        sse-connect="/chat"
+        sse-close="close"
+        id="message"
+        sse-swap="message"
+      ></p>`
+    )
+     htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type;
+    });
+    this.eventSource.sendEvent('close', '<p></p>')
+
+    this.eventSource.wasClosed().should.equal(true)
+    this.closeType.should.equal('message')
   })
 
   it('is not listening for events after hx-swap element removed', function() {
