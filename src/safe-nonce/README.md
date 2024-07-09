@@ -17,6 +17,10 @@ When partial AJAX requests are swapped into part of the page the `HX-Nonce` head
 
 Note It would be ideal to use the existing Content-Security-Policy header instead of a custom HX-Nonce header for this purpose but browsers only process CSP headers on full page loads and not the partial AJAX requests htmx uses. 
 
+This extension is not compatible with part of the htmx history feature which fetches the page from the server via AJAX when the history is not cached because it updates the page without updating the script nonces correctly so the extension forces `refreshOnHistoryMiss` config to true handle this use case. 
+
+Using this extension with the `selfRequestsOnly` default config disabled to allow external domains to be accessed via htmx requests is not recommended as it can undo some of the protections.
+
 ## Install
 
 ```html

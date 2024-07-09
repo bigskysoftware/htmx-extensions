@@ -4,6 +4,9 @@ htmx.defineExtension('safe-nonce', {
       htmx.config.safeInlineScriptNonce = htmx.config.inlineScriptNonce
       htmx.config.inlineScriptNonce = ''
     }
+    if (!htmx.config.refreshOnHistoryMiss) { 
+      htmx.config.refreshOnHistoryMiss = true
+    }
     const nonce = xhr.getResponseHeader('HX-Nonce')
     if (htmx.config.safeInlineScriptNonce && nonce) {
       const escapedRegex = new RegExp(`nonce="${nonce.replace(/[\\\[\]\/^*.+?$(){}'#:!=|]/g, '\\$&')}"`, 'g')
