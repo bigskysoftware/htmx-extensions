@@ -86,7 +86,7 @@ describe('safe-nonce extension tests', function() {
     }, 50)
   })
 
-  it('safe-nonce enabled but inlineScriptNonce set wrong set wrong blocks inline scripts running', function(done) {
+  it('safe-nonce enabled but inlineScriptNonce set wrong blocks inline scripts running', function(done) {
     window.i = 0 // set count to 0
     this.server.respondWith('GET', '/test', [200, { 'HX-Nonce': '6p1zabP/K+va3O8bi2yydg==' }, '<script nonce="6p1zabP/K+va3O8bi2yydg==">console.trace(); window.i++</script>'])
     htmx.config.inlineScriptNonce = 'invalid' // When set to an invalid value expect inline scripts to fail
