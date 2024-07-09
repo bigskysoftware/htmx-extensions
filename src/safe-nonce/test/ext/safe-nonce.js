@@ -74,7 +74,7 @@ describe('safe-nonce extension tests', function() {
     // safe-nonce overrides inlineScriptNonce function and requires the server to respond with HX-Nonce header instead
     window.i = 0 // set count to 0
     this.server.respondWith('GET', '/test', [200, { 'HX-Nonce': '6p1zabP/K+va3O8bi2yydg==' }, '<script nonce="6p1zabP/K+va3O8bi2yydg==">console.trace(); window.i++</script>'])
-    htmx.config.inlineScriptNonce = 'nonce'
+    htmx.config.SafeInlineScriptNonce = 'nonce'
     var div = make('<div hx-ext="safe-nonce" hx-get="/test" hx-swap="innerHTML settle:5ms"/>')
     div.click()
     this.server.respond()
@@ -89,7 +89,7 @@ describe('safe-nonce extension tests', function() {
   it('safe-nonce enabled but inlineScriptNonce set wrong blocks inline scripts running', function(done) {
     window.i = 0 // set count to 0
     this.server.respondWith('GET', '/test', [200, { 'HX-Nonce': '6p1zabP/K+va3O8bi2yydg==' }, '<script nonce="6p1zabP/K+va3O8bi2yydg==">console.trace(); window.i++</script>'])
-    htmx.config.inlineScriptNonce = 'invalid' // When set to an invalid value expect inline scripts to fail
+    htmx.config.safeInlineScriptNonce = 'invalid' // When set to an invalid value expect inline scripts to fail
     var div = make('<div hx-ext="safe-nonce" hx-get="/test" hx-swap="innerHTML settle:5ms"/>')
     div.click()
     this.server.respond()
@@ -104,7 +104,7 @@ describe('safe-nonce extension tests', function() {
   it('safe-nonce enabled but HX-Nonce header does not match script nonce will block inline scripts', function(done) {
     window.i = 0 // set count to 0
     this.server.respondWith('GET', '/test', [200, { 'HX-Nonce': '6p1zabP/K+va3O8bi2yydg==' }, '<script nonce="invalid">console.trace(); window.i++</script>'])
-    htmx.config.inlineScriptNonce = 'nonce'
+    htmx.config.safeInlineScriptNonce = 'nonce'
     var div = make('<div hx-ext="safe-nonce" hx-get="/test" hx-swap="innerHTML settle:5ms"/>')
     div.click()
     this.server.respond()

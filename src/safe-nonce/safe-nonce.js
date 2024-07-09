@@ -1,7 +1,6 @@
 htmx.defineExtension('safe-nonce', {
   transformResponse: function(text, xhr, elt) {
     if (htmx.config.inlineScriptNonce) {
-      htmx.config.safeInlineScriptNonce = htmx.config.inlineScriptNonce
       htmx.config.inlineScriptNonce = ''
     }
     if (!htmx.config.refreshOnHistoryMiss) { 

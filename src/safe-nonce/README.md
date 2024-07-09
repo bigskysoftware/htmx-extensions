@@ -8,7 +8,7 @@ To implement this extension complete the following steps:
 2. Set the hx-ext attribute in the body tag of all full page requests to `safe-nonce`
 3. Generate a truly random nonce value on each server response
 4. Return the random nonce in your CSP response header or in a CSP meta tag
-5. Return a htmx-config meta tag to set inlineScriptNonce to your nonce at the top of your page head (Note that htmx only reads the first htmx-config meta tag in the page so move it as high as you can)
+5. Return a htmx-config meta tag to set safeInlineScriptNonce to your nonce at the top of your page head (Note that htmx only reads the first htmx-config meta tag in the page so move it as high as you can)
 6. Return the `HX-Nonce` response header set to the value of your random nonce
 7. Update all inline script tags you trust to include `nonce="{random-nonce}"` attribute
 8. Use developer tools to test your website loads without CSP warnings in console output
@@ -35,7 +35,7 @@ A sample initial page load response:
 HX-Nonce: "{random-nonce}"
 Content-Security-Policy: "default-src 'self' 'nonce-{random-nonce}'; style-src 'self' 'nonce-{random-nonce}'"
 <head>
-    <meta name="htmx-config" content='{"inlineScriptNonce":"{random-nonce}","inlineStyleNonce":"{random-nonce}"}'>
+    <meta name="htmx-config" content='{"safeInlineScriptNonce":"{random-nonce}","inlineStyleNonce":"{random-nonce}"}'>
     <script src="https://unpkg.com/htmx-ext-safe-nonce@2.0.0/safe-nonce.js"></script>
     <script nonce="{random-nonce}">console.log('safe')</script>
 </head>
