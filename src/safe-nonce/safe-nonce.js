@@ -1,7 +1,7 @@
 htmx.defineExtension('safe-nonce', {
   transformResponse: function(text, xhr, elt) {
     if (htmx.config.inlineScriptNonce) {
-      htmx.config.safeinlineScriptNonce = htmx.config.inlineScriptNonce
+      htmx.config.safeInlineScriptNonce = htmx.config.inlineScriptNonce
       htmx.config.inlineScriptNonce = ''
     }
     const nonce = xhr.getResponseHeader('HX-Nonce')
