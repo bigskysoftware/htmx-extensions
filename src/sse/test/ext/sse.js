@@ -202,7 +202,7 @@ describe('sse extension', function() {
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
             '</div>')
     htmx.on(div, "htmx:sseClose", (evt) => {
-      this.closeType = evt.detail.type 
+      this.closeType = evt.detail.type
     })
     this.clock.tick(1)
     div.click()
@@ -234,11 +234,11 @@ describe('sse extension', function() {
             '</div>')
     this.clock.tick(1)
     div.parentElement.removeChild(div)
-  
+
     htmx.on(div, "htmx:sseClose", (evt) => {
       this.closeType = evt.detail.type
     })
-    
+
     this.eventSource.sendEvent('e1')
     this.closeType.should.equal("nodeMissing")
     this.eventSource.readyState.should.equal(EventSource.CLOSED)

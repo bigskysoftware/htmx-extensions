@@ -167,12 +167,11 @@ document.body.addEventListener('htmx:sseClose', function (e) {
             // Parent node is missing and therefore connection was closed
             ...
         case "nodeReplaced":
-            // Parent node replacement caused closing of connection 
+            // Parent node replacement caused closing of connection
             ...
         case "message":
-            // connection was closed due to reception of message sse-close 
+            // connection was closed due to reception of message sse-close
             ...
-            
     }
 })
 ```
