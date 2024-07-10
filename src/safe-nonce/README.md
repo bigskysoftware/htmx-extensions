@@ -9,13 +9,13 @@ To implement this extension complete the following steps:
 3. Generate a truly random nonce value on each server response
 4. Return the random nonce in your CSP response header or in a CSP meta tag
 5. Return a htmx-config meta tag to set safeInlineScriptNonce to your nonce at the top of your page head (Note that htmx only reads the first htmx-config meta tag in the page so move it as high as you can)
-6. Return the `HX-Nonce` response header set to the value of your random nonce
-7. Update all inline script tags you trust to include `nonce="{random-nonce}"` attribute
+6. Update all inline script tags you trust to include `nonce="{random-nonce}"` attribute
+7. Return the `HX-Nonce` response header set to the value of your random nonce on all responses that have protected inline scripts
 8. Use developer tools to test your website loads without CSP warnings in console output
 
-When partial AJAX requests are swapped into part of the page the `HX-Nonce` header will be used to update the nonce attribute of only the trusted inline scripts to match the initial page load nonce value which allows just these scripts to execute.
+When partial AJAX requests are swapped into part of the page the `HX-Nonce` header will be used to update the nonce attribute of only the trusted inline scripts to match the initial page load nonce value which allows just these scripts to execute. There is nonce reuse protection so the inital page load nonce if it is discovered can not be abused.
 
-Note It would be ideal to use the existing Content-Security-Policy header instead of a custom HX-Nonce header for this purpose but browsers only process CSP headers on full page loads and not the partial AJAX requests htmx uses. 
+Note It would be ideal to use the existing Content-Security-Policy header instead of a custom HX-Nonce header for this purpose but browsers only process CSP headers on full page loads and not the partial AJAX requests htmx uses.
 
 This extension is not compatible with part of the htmx history feature which fetches the page from the server via AJAX when the history is not cached because it updates the page without updating the script nonces correctly so the extension forces `refreshOnHistoryMiss` config to true handle this use case. 
 
