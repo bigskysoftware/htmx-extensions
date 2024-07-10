@@ -1,7 +1,7 @@
 //==========================================================
 // head-support.js
 //
-// An extension to htmx 1.0 to add head tag merging.
+// An extension to add head tag merging.
 //==========================================================
 (function(){
 
