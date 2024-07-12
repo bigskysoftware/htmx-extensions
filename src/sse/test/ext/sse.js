@@ -62,6 +62,7 @@ describe('sse extension', function() {
 
   beforeEach(function() {
     this.server = makeServer()
+    this.closeType = ""
     this.clock = sinon.useFakeTimers();
     var test = this
     clearWorkArea()
@@ -200,9 +201,14 @@ describe('sse extension', function() {
     var div = make('<div hx-get="/test" hx-swap="outerHTML" hx-ext="sse" sse-connect="/foo">' +
             '<div id="d1" hx-trigger="sse:e1" hx-get="/d1">div1</div>' +
             '</div>')
+    htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type
+    })
     this.clock.tick(1)
     div.click()
+
     this.server.respond()
+    this.closeType.should.equal("nodeReplaced")
     this.eventSource.readyState.should.equal(EventSource.CLOSED)
   })
 
@@ -211,9 +217,14 @@ describe('sse extension', function() {
     var div = make('<div hx-get="/test" hx-swap="outerHTML" hx-ext="sse" sse-connect="/foo">' +
             '<div id="d1" hx-swap="e1" hx-get="/d1">div1</div>' +
             '</div>')
+    htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type
+    })
     this.clock.tick(1)
     div.click()
+
     this.server.respond()
+    this.closeType.should.equal("nodeReplaced")
     this.eventSource.readyState.should.equal(EventSource.CLOSED)
   })
 
@@ -223,7 +234,13 @@ describe('sse extension', function() {
             '</div>')
     this.clock.tick(1)
     div.parentElement.removeChild(div)
+
+    htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type
+    })
+
     this.eventSource.sendEvent('e1')
+    this.closeType.should.equal("nodeMissing")
     this.eventSource.readyState.should.equal(EventSource.CLOSED)
   })
 
@@ -231,9 +248,13 @@ describe('sse extension', function() {
     var div = make('<div hx-ext="sse" sse-connect="/foo" sse-close="close">' +
             '<div id="d1" sse-swap="e1"></div>' +
             '</div>');
+    htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type
+    })
     this.clock.tick(1)
     this.eventSource.readyState.should.equal(EventSource.OPEN);
     this.eventSource.sendEvent("close");
+    this.closeType.should.equal("message")
     this.eventSource.readyState.should.equal(EventSource.CLOSED);
   })
 
@@ -241,9 +262,34 @@ describe('sse extension', function() {
     var div = make('<div hx-ext="sse"><div sse-connect="/foo" sse-close="close">' +
             '<div id="d1" sse-swap="e1"></div>' +
             '</div></div>');
+
+    htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type
+    })
     this.clock.tick(1)
+
     this.eventSource.readyState.should.equal(EventSource.OPEN);
     this.eventSource.sendEvent("close");
+    this.closeType.should.equal("message")
+    this.eventSource.readyState.should.equal(EventSource.CLOSED);
+  })
+  it('is closed after close message from server, non-nested', function(){
+    var div = make(`<p
+        hx-ext="sse"
+        sse-connect="/chat"
+        sse-close="close"
+        id="message"
+        sse-swap="message"
+      ></p>`
+    )
+     htmx.on(div, "htmx:sseClose", (evt) => {
+      this.closeType = evt.detail.type;
+    });
+    this.clock.tick(1)
+    this.eventSource.readyState.should.equal(EventSource.OPEN);
+    this.eventSource.sendEvent('close', '<p></p>')
+
+    this.closeType.should.equal('message')
     this.eventSource.readyState.should.equal(EventSource.CLOSED);
   })
 

@@ -44,7 +44,12 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
         case 'htmx:beforeCleanupElement':
           var internalData = api.getInternalData(parent)
           // Try to remove remove an EventSource when elements are removed
-          if (internalData.sseEventSource) {
+          var source = internalData.sseEventSource
+          if (source) {
+            api.triggerEvent(parent, 'htmx:sseClose', {
+              source,
+              type: 'nodeReplaced',
+            })
             internalData.sseEventSource.close()
           }
 
@@ -231,6 +236,10 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
     if (closeAttribute) {
       // close eventsource when this message is received
       source.addEventListener(closeAttribute, function() {
+        api.triggerEvent(elt, 'htmx:sseClose', {
+          source,
+          type: 'message',
+        })
         source.close()
       });
     }
@@ -247,6 +256,10 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
     if (!api.bodyContains(elt)) {
       var source = api.getInternalData(elt).sseEventSource
       if (source != undefined) {
+        api.triggerEvent(elt, 'htmx:sseClose', {
+          source,
+          type: 'nodeMissing',
+        })
         source.close()
         // source = null
         return true
