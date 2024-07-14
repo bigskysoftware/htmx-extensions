@@ -1,3 +1,6 @@
+# `class-tools` - Swap CSS classes
+
+## Manipulate classes of an element (e.g. for CSS transitions)
 
 The `class-tools` extension  allows you to specify CSS classes that will be swapped onto or off of the elements by using
 a `classes` or `data-classes` attribute.  This functionality allows you to apply
@@ -12,7 +15,14 @@ Within a run, a `,` character separates distinct class operations.
 A class operation is an operation name `add`, `remove`, or `toggle`, followed by a CSS class name,
 optionally followed by a colon `:` and a time delay.
 
-There is also the option to use `apply-parent-classes` or `data-apply-parent-classes` which uses the same format as `classes` but is instead designed for Out of band updates to allow you to manipulate CSS classes of an existing element in the DOM without otherwise knowing or altering its state. Any element with this property will apply classes to its parent and also remove this child element afterwards so should ideally be used as part of a `hx-swap-oob="beforeend: #some-element`.
+## Out-of-band class manipulation
+
+There is also the option to use `apply-parent-classes`, or `data-apply-parent-classes`, which take the same format as `classes`
+but is instead designed for out-of-band updates, allowing you to manipulate CSS classes of an existing element in the DOM
+without otherwise knowing or altering its state.
+
+Any element with this property will schedule classes to be applied to its _parent_ element, _removing_ itself afterwards,
+so it should ideally be used as part of an `hx-swap-oob="beforeend: #some-element` to add them to the end of the target element.
 
 ## Install
 
@@ -23,6 +33,7 @@ There is also the option to use `apply-parent-classes` or `data-apply-parent-cla
 ## Usage
 
 ```html
+<!-- The following DOM has classess swapped in and out as scheduled -->
 <div hx-ext="class-tools">
     <div classes="add foo"/> <!-- adds the class "foo" after 100ms -->
     <div class="bar" classes="remove bar:1s"/> <!-- removes the class "bar" after 1s -->
@@ -32,7 +43,10 @@ There is also the option to use `apply-parent-classes` or `data-apply-parent-cla
                                                                  class "foo" after 1s  -->
     <div classes="toggle foo:1s"/> <!-- toggles the class "foo" every 1s -->
 </div>
-<div hx-swap-oob="beforeend: #my-element"> <!-- adds the class "foo" to my-element for 10s -->
-    <div hx-ext="class-tools" apply-parent-classes="add foo, remove foo:10s"></div>
+
+<!-- The following OOB update surgically applies CSS classes to "my-element" -->
+<div hx-swap-oob="beforeend: #my-element">
+    <div hx-ext="class-tools"
+         apply-parent-classes="add foo, remove foo:10s"/> <!-- adds the class "foo" to "my-element" for 10s -->
 </div>
 ```
