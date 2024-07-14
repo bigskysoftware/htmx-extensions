@@ -22,7 +22,7 @@ but is instead designed for out-of-band updates, allowing you to manipulate CSS 
 without otherwise knowing or altering its state.
 
 Any element with this property will schedule classes to be applied to its _parent_ element, _removing_ itself afterwards,
-so it should ideally be used as part of an `hx-swap-oob="beforeend: #some-element` to add them to the end of the target element.
+so it should ideally be used as part of an `hx-swap-oob="beforeend: #some-element"` to add them to the end of the target element.
 
 ## Install
 
@@ -33,7 +33,7 @@ so it should ideally be used as part of an `hx-swap-oob="beforeend: #some-elemen
 ## Usage
 
 ```html
-<!-- The following DOM has classess swapped in and out as scheduled -->
+<!-- The following DOM has classes swapped in and out as scheduled -->
 <div hx-ext="class-tools">
     <div classes="add foo"/> <!-- adds the class "foo" after 100ms -->
     <div class="bar" classes="remove bar:1s"/> <!-- removes the class "bar" after 1s -->
