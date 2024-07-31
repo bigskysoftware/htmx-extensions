@@ -154,4 +154,57 @@ describe('json-enc extension', function() {
     values.numberString.should.equal('5000')
     chai.assert.deepEqual(values.obj, {'x': 123})
   })
+
+  it('handles multiple values per key', function() {
+    this.server.respondWith('POST', '/test', function(xhr) {
+      var values = JSON.parse(xhr.requestBody)
+      values.should.have.keys('foo', 'bar')
+      values.foo.should.be.instanceOf(Array)
+      values.foo.length.should.equal(3)
+      values.foo[0].should.equal('A')
+      values.foo[1].should.equal('B')
+      values.foo[2].should.equal('C')
+      values.bar.should.equal('D')
+      xhr.respond(200, {}, 'OK')
+    })
+
+    var form = make('<form hx-post="/test" hx-ext="json-enc" > ' +
+      '<input type="text" name="foo" value="A">' +
+      '<input type="text" name="foo" value="B">' +
+      '<input type="text" name="foo" value="C">' +
+      '<input type="text" name="bar" value="D">' +
+      '<button id="btnSubmit">Submit</button>' +
+      '</form>')
+
+    byId('btnSubmit').click()
+    this.server.respond()
+    form.innerHTML.should.equal('OK')
+  })
+
+  it('handles multiple select', function() {
+    this.server.respondWith('POST', '/test', function(xhr) {
+      var values = JSON.parse(xhr.requestBody)
+      values.should.have.keys('foo', 'bar')
+      values.foo.should.be.instanceOf(Array)
+      values.foo.length.should.equal(2)
+      values.foo[0].should.equal('A')
+      values.foo[1].should.equal('C')
+      values.bar.should.equal('D')
+      xhr.respond(200, {}, 'OK')
+    })
+
+    var form = make('<form hx-post="/test" hx-ext="json-enc" > ' +
+      '<select multiple="multiple" name="foo">' +
+      '<option value="A" selected="selected">A</option>\n' +
+      '<option value="B">B</option>\n' +
+      '<option value="C" selected="selected">C</option>' +
+      '</select>' +
+      '<input type="text" name="bar" value="D">' +
+      '<button id="btnSubmit">Submit</button>' +
+      '</form>')
+
+    byId('btnSubmit').click()
+    this.server.respond()
+    form.innerHTML.should.equal('OK')
+  })
 })

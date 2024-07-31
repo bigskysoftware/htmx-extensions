@@ -18,11 +18,18 @@
       const object = {}
       parameters.forEach(function(value, key) {
         // FormData encodes values as strings, restore hx-vals/hx-vars with their initial types
-        object[key] = Object.hasOwn(vals, key) ? vals[key] : value
+        const typedValue = Object.hasOwn(vals, key) ? vals[key] : value
+        if (object[key]) {
+          if (!Array.isArray(object[key])) {
+            object[key] = [object[key]]
+          }
+          object[key].push(typedValue)
+        } else {
+          object[key] = typedValue
+        }
       })
 
       return (JSON.stringify(object))
     }
   })
-
 })()
