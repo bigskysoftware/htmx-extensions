@@ -77,6 +77,14 @@ Multiple events in different elements (from the same source).
 </div>
 ```
 
+### Define inline swap strategy
+
+The default swap strategy used is `innerHTML`, you can change it using `hx-swap`. This can  cause some problems since `hx-swap` will be inherited. In these situations you can inline a swap strategy similar to the `hx-swap-oob` tag
+```html
+<div hx-ext="sse" sse-connect="/event_stream" sse-swap="beforeend:event1"></div>
+```
+the syntax is `[strategy:]event-name` or `[strategy:]message`
+
 ### Trigger Server Callbacks
 
 When a connection for server sent events has been established, child elements can listen for these events by using the special [`hx-trigger`](https://htmx.org/reference/hx-trigger.md) syntax `sse:<event_name>`.  This, when combined with an `hx-get` or similar will trigger the element to make a request.

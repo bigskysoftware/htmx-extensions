@@ -102,7 +102,19 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       var sseEventNames = sseSwapAttr.split(',')
 
       for (var i = 0; i < sseEventNames.length; i++) {
-        const sseEventName = sseEventNames[i].trim()
+        let sseEventName
+        let sseSwapStyle
+        const sseEvent = sseEventNames[i].trim()
+        
+        if (sseEvent.indexOf(':') > 0) {
+          const e = sseEvent.split(':')
+          sseEventName = e[1]
+          sseSwapStyle = e[0]
+        } else {
+          sseEventName = sseEvent
+        }
+
+
         const listener = function(event) {
           // If the source is missing then close SSE
           if (maybeCloseSSESource(sourceElement)) {
@@ -119,7 +131,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
           if (!api.triggerEvent(elt, 'htmx:sseBeforeMessage', event)) {
             return
           }
-          swap(elt, event.data)
+          swap(elt, event.data, sseSwapStyle)
           api.triggerEvent(elt, 'htmx:sseMessage', event)
         }
 
@@ -273,12 +285,15 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
    * @param {HTMLElement} elt
    * @param {string} content
    */
-  function swap(elt, content) {
+  function swap(elt, content, swapStyle) {
     api.withExtensions(elt, function(extension) {
       content = extension.transformResponse(content, null, elt)
     })
 
     var swapSpec = api.getSwapSpecification(elt)
+    if (swapStyle) {
+      swapSpec.swapStyle = swapStyle
+    }
     var target = api.getTarget(elt)
     api.swap(target, content, swapSpec)
   }
