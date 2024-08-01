@@ -28,7 +28,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
     },
 
     getSelectors: function() {
-      return ['[sse-connect]', '[data-sse-connect]', '[sse-swap]', '[data-sse-swap]']
+      return ['[sse-connect]', '[data-sse-connect]', '[sse-swap]', '[data-sse-swap]', '[hx-sse-swap]']
     },
 
     /**
@@ -102,19 +102,8 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       var sseEventNames = sseSwapAttr.split(',')
 
       for (var i = 0; i < sseEventNames.length; i++) {
-        let sseEventName
-        let sseSwapStyle
-        const sseEvent = sseEventNames[i].trim()
-        
-        if (sseEvent.indexOf(':') > 0) {
-          const e = sseEvent.split(':')
-          sseEventName = e[1]
-          sseSwapStyle = e[0]
-        } else {
-          sseEventName = sseEvent
-        }
-
-
+        const sseEventName = sseEventNames[i].trim()
+  
         const listener = function(event) {
           // If the source is missing then close SSE
           if (maybeCloseSSESource(sourceElement)) {
@@ -131,7 +120,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
           if (!api.triggerEvent(elt, 'htmx:sseBeforeMessage', event)) {
             return
           }
-          swap(elt, event.data, sseSwapStyle)
+          swap(elt, event.data)
           api.triggerEvent(elt, 'htmx:sseMessage', event)
         }
 
@@ -176,6 +165,62 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
         api.getInternalData(elt).sseEventListener = listener
         source.addEventListener(ts.trigger.slice(4), listener)
       })
+    }
+
+    // Add message handlers for every `hx-sse-swap` attribute
+    if (api.getAttributeValue(elt, 'hx-sse-swap')) {
+      // Find closest existing event source
+      var sourceElement = api.getClosestMatch(elt, hasEventSource)
+      if (sourceElement == null) {
+        // api.triggerErrorEvent(elt, "htmx:noSSESourceError")
+        return null // no eventsource in parentage, orphaned element
+      }
+
+      // Set internalData and source
+      var internalData = api.getInternalData(sourceElement)
+      var source = internalData.sseEventSource
+
+      var sseSwapAttr = api.getAttributeValue(elt, 'hx-sse-swap')
+      var sseEventNames = sseSwapAttr.split(',')
+
+      for (var i = 0; i < sseEventNames.length; i++) {
+        let sseEventName
+        let sseSwapStyle
+        const sseEvent = sseEventNames[i].trim()
+        
+        if (sseEvent.indexOf(':') > 0) {
+          const e = sseEvent.split(':')
+          sseEventName = e[1]
+          sseSwapStyle = e[0]
+        } else {
+          sseEventName = sseEvent
+        }
+
+
+        const listener = function(event) {
+          // If the source is missing then close SSE
+          if (maybeCloseSSESource(sourceElement)) {
+            return
+          }
+
+          // If the body no longer contains the element, remove the listener
+          if (!api.bodyContains(elt)) {
+            source.removeEventListener(sseEventName, listener)
+            return
+          }
+
+          // swap the response into the DOM and trigger a notification
+          if (!api.triggerEvent(elt, 'htmx:sseBeforeMessage', event)) {
+            return
+          }
+          swap(elt, event.data, sseSwapStyle)
+          api.triggerEvent(elt, 'htmx:sseMessage', event)
+        }
+
+        // Register the new listener
+        api.getInternalData(elt).sseEventListener = listener
+        source.addEventListener(sseEventName, listener)
+      }
     }
   }
 
