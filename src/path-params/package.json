@@ -19,6 +19,6 @@
     "mocha": "10.1.0",
     "mocha-chrome": "https://github.com/Telroshan/mocha-chrome",
     "sinon": "^9.2.4",
-    "htmx.org": "^2.0.1"
+    "htmx.org": "^2.0.2"
   }
 }
