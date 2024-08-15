@@ -1,7 +1,7 @@
 {
   "name": "htmx-ext-head-support",
   "main": "head-support.js",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "scripts": {
     "lint": "eslint test/ext test",
     "lint-fix": "eslint test/ext test --fix",

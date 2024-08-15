@@ -13,7 +13,7 @@ a feature of the library.  This extension addresses that shortcoming.
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx-ext-head-support@2.0.0/head-support.js"></script>
+<script src="https://unpkg.com/htmx-ext-head-support@2.0.1/head-support.js"></script>
 ```
 
 ## Usage

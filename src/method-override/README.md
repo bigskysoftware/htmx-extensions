@@ -5,7 +5,7 @@ actual HTTP method.  This is necessary when dealing with some firewall or proxy 
 ## Install
 
 ```html
-<script src="https://unpkg.com/htmx-ext-method-override@2.0.0/method-override.js"></script>
+<script src="https://unpkg.com/htmx-ext-method-override@2.0.1/method-override.js"></script>
 ```
 
 ### Usage
