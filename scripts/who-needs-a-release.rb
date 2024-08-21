@@ -20,19 +20,21 @@ Dir.foreach('.') do |filename|
     current_version = as_json['dist-tags']['latest']
     main_file = as_json['main']
 
+    package_info_as_json = JSON.parse(File.read('package.json'))
+    local_version = package_info_as_json['version']
     #puts "Checking #{name}@#{current_version}"
 
     `curl -sS https://unpkg.com/#{name}@#{current_version}/#{main_file} > tmp.js`
 
     diff = `diff #{main_file} tmp.js`
 
-    if  not diff.empty?
-      puts "  --> !!!!!!! #{name}@#{current_version} REQUIRES UPDATE !!!!!!!"
-      package_info = File.read('package.json')
-      package_info_as_json = JSON.parse(package_info)
-      if current_version == package_info_as_json['version']
+    if not diff.empty?
+      puts "  --> !!!!!!! #{name}@#{current_version} REQUIRES A RELEASE !!!!!!!"
+      if current_version == local_version
         puts "      --> !!!!!!! package.json NEEDS VERSION BUMP !!!!!!!"
       end
+    elsif current_version != local_version
+      puts "  --> !!!!!!! #{name}@#{current_version} REQUIRES A RELEASE !!!!!!!"
     end
 
     `rm tmp.js`
