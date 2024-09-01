@@ -63,7 +63,7 @@ a [`<template>` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/t
   <meta name="viewport" content="width=device-width">
   <meta name="htmx-config" content='{"selfRequestsOnly":false}'>
   <title>JS Bin</title>
-  <script src="https://unpkg.com/htmx.org"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.0"></script>
   <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.0/client-side-templates.js"></script>
   <script src="https://unpkg.com/mustache@latest"></script>
 </head>
@@ -79,14 +79,13 @@ a [`<template>` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/t
     <p id="content">Start</p>
 
     <template id="foo">
-      <p> {% raw %}{{userID}}{% endraw %} and {% raw %}{{id}}{% endraw %} and {% raw %}{{title}}{% endraw %} and {% raw %}{{completed}}{% endraw %}</p>
+      <p> {{userID}} and {{id}} and {{title}} and {{completed}}</p>
     </template>
   </div>
 </body>
 </html>
 ```
-
-Here is a [jsbin](https://jsbin.com/qonutovico/edit?html,output) playground to try this out.
+[demo (external link)](https://barakplasma.github.io/htmx-weather/mustache)
 
 Here's a working example using the `mustache-array-template` working against an API that returns an array:
 ```html
@@ -121,6 +120,7 @@ Here's a working example using the `mustache-array-template` working against an 
 </body>
 </html>
 ```
+[demo (external link)](https://barakplasma.github.io/htmx-weather/mustache-array)
 
 ### Full XSLT HTML Example
 
