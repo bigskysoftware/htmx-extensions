@@ -204,4 +204,4 @@ what you are trying to do, you may find it easier to rely on your server-side fr
 these requests to 3rd parties services.
 
 ## selfRequestsOnly
-Since v2 of htmx, requests to external domains are blocked by default. You can add the [selfRequestsOnly](https://htmx.org/reference/#:~:text=htmx.config.selfRequestsOnly) config (`<meta name="htmx-config" content='{"selfRequestsOnly":false}'>`) to allow requests to external domains to work.
+[Since v2 of htmx](https://htmx.org/migration-guide-htmx-1/#:~:text=If%20you%20want%20to%20make%20cross%2Ddomain%20requests%20with%20htmx%2C%20revert%20htmx.config.selfRequestsOnly%20to%20false), requests to external domains are blocked by default. You can add the [selfRequestsOnly](https://htmx.org/reference/#:~:text=htmx.config.selfRequestsOnly) config (`<meta name="htmx-config" content='{"selfRequestsOnly":false}'>`) to allow requests to external domains to work.
