@@ -31,10 +31,6 @@ htmx.defineExtension('preload', {
         if (attr(node, 'preload-images') == 'true') {
           document.createElement('div').innerHTML = html // create and populate a node to load linked resources, too.
         }
-
-        // once the request is done, remove the event handler
-        node.removeEventListener('htmx:beforeRequest', node.prefetchEventHandler, true)
-        delete node.prefetchEventHandler
       }
 
       return function() {
@@ -54,6 +50,7 @@ htmx.defineExtension('preload', {
           // function that intercepts htmx.ajax requests and performs them
           // with XMLHttpRequest directly to avoid any side effects
           node.prefetchEventHandler = function(event) {
+            node.removeEventListener('htmx:beforeRequest', node.prefetchEventHandler, true)
             event.stopImmediatePropagation()
             event.preventDefault()
             // Since it is a GET request, we're only interested in the 
