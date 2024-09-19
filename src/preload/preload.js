@@ -49,8 +49,7 @@ htmx.defineExtension('preload', {
         if (hxGet) {
           // function that intercepts htmx.ajax requests and performs them
           // with XMLHttpRequest directly to avoid any side effects
-          node.prefetchEventHandler = function(event) {
-            node.removeEventListener('htmx:beforeRequest', node.prefetchEventHandler, true)
+          const prefetchEventHandler = function(event) {
             event.stopImmediatePropagation()
             event.preventDefault()
             // Since it is a GET request, we're only interested in the 
@@ -70,7 +69,11 @@ htmx.defineExtension('preload', {
           }
 
           // Add the event handler to the node
-          node.addEventListener('htmx:beforeRequest', node.prefetchEventHandler, true)
+          const options = { 
+            capture: true, 
+            once: true
+          }
+          node.addEventListener('htmx:beforeRequest', prefetchEventHandler, options)
 
           // let HTMX create the request to be intercepted by the event handler
           htmx.ajax('GET', hxGet, {
