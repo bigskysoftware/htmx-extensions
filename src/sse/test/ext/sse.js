@@ -498,6 +498,37 @@ describe('sse extension', function() {
     htmx.off('htmx:sseMessage', handle)
   })
 
+  it('performs out-of-band-swaps (hx-swap-oob)', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/event_stream" hx-swap="none" sse-swap="e1">\n' +
+            '<div id="d1" hx-swap="outerHTML"></div>\n' +
+            '</div>\n' +
+            '<div id="oob"></div>\n');
+
+    this.clock.tick(1)
+
+    this.eventSource.sendEvent('e1', '<div id="oob" hx-swap-oob="true">Out-of-Band Content</div>' +
+                                  '<div id="in-band">In-Band Content</div>');
+    this.clock.tick(1)
+
+    byId('oob').innerHTML.should.equal('Out-of-Band Content')
+
+  })
+
+  it('performs out-of-band-swaps and regular sse swaps (hx-swap-oob)', function() {
+    var div = make('<div id="container" hx-ext="sse" sse-connect="/event_stream" hx-swap="afterbegin" sse-swap="e1">\n' +
+            '</div>\n' +
+            '<div id="oob"></div>\n');
+
+    this.clock.tick(1)
+
+    this.eventSource.sendEvent('e1', '<div id="oob" hx-swap-oob="true">Out-of-Band Content</div>' +
+                                  '<div id="in-band">In-Band Content</div>');
+    this.clock.tick(1)
+
+    byId('oob').innerHTML.should.equal('Out-of-Band Content')
+    byId('container').firstChild.innerHTML.should.equal("In-Band Content")
+  })
+
   it('handles sse reconnection', function() {
     this.server.respondWith('GET', '/d1', 'div1 updated')
     this.server.respondWith('GET', '/d2', 'div2 updated')

@@ -280,6 +280,18 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
 
     var swapSpec = api.getSwapSpecification(elt)
     var target = api.getTarget(elt)
+
+    var fragment = api.makeFragment(content)
+    if (fragment.children.length) {
+      var children = Array.from(fragment.children)
+      for (var i = 0; i < children.length; i++) {
+        var swapValue = api.getAttributeValue(children[i], 'hx-swap-oob')
+        if (swapValue) {
+          api.oobSwap(swapValue || 'true', children[i], api.makeSettleInfo(elt))
+        }
+      }
+    }
+
     api.swap(target, content, swapSpec)
   }
 
