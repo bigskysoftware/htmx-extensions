@@ -145,7 +145,7 @@ This event is dispatched when an SSE connection could not be established.
 
 #### `htmx:sseBeforeMessage`
 
-This event is dispatched just before the SSE event data is swapped into the DOM. If you don't want to swap call `preventDefault()` on the event. Additionally the `details` field is a [MessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/EventSource/message_event) - this is the event created by [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) when it receives an SSE message.
+This event is dispatched just before the SSE event data is swapped into the DOM. If you don't want to swap call `preventDefault()` on the event. Additionally the `detail` field is a [MessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/EventSource/message_event) - this is the event created by [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) when it receives an SSE message.
 
 ##### Details
 
@@ -153,7 +153,7 @@ This event is dispatched just before the SSE event data is swapped into the DOM.
 
 #### `htmx:sseMessage`
 
-This event is dispatched after the SSE event data has been swapped into the DOM. The `details` field is a [MessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/EventSource/message_event) - this is the event created by [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) when it receives an SSE message.
+This event is dispatched after the SSE event data has been swapped into the DOM. The `detail` field is a [MessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/EventSource/message_event) - this is the event created by [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) when it receives an SSE message.
 
 #### `htmx:sseClose`
 
