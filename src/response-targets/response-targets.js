@@ -29,13 +29,13 @@
     var attrPossibilities = [
       respCode,
 
-      respCode.substr(0, 2) + '*',
-      respCode.substr(0, 2) + 'x',
+      respCode.substring(0, 2) + '*',
+      respCode.substring(0, 2) + 'x',
 
-      respCode.substr(0, 1) + '*',
-      respCode.substr(0, 1) + 'x',
-      respCode.substr(0, 1) + '**',
-      respCode.substr(0, 1) + 'xx',
+      respCode.substring(0, 1) + '*',
+      respCode.substring(0, 1) + 'x',
+      respCode.substring(0, 1) + '**',
+      respCode.substring(0, 1) + 'xx',
 
       '*',
       'x',
