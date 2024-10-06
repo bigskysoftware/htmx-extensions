@@ -40,11 +40,42 @@ htmx.defineExtension('preload', {
         }
 
         // Special handling for HX-GET - use built-in htmx.ajax function
-        // so that headers match other htmx requests, then set
+        // so that headers match other htmx requests, then intercept the request
+        // to extract the request parameters and perform XMLHttpRequest directly
+        // to avoid creating any events and making side effects. Afterward, set
         // node.preloadState = TRUE so that requests are not duplicated
         // in the future
         var hxGet = node.getAttribute('hx-get') || node.getAttribute('data-hx-get')
         if (hxGet) {
+          // function that intercepts htmx.ajax requests and performs them
+          // with XMLHttpRequest directly to avoid any side effects
+          const prefetchEventHandler = function(event) {
+            event.stopImmediatePropagation()
+            event.preventDefault()
+            // Since it is a GET request, we're only interested in the 
+            // request headers and the URL
+            const headers = event.detail.requestConfig.headers
+            const url = event.detail.pathInfo.finalRequestPath
+
+            const r = new XMLHttpRequest()
+            r.open('GET', url)
+            for (const [key, value] of Object.entries(headers)) {
+              if (value != null && value !== undefined) {
+                r.setRequestHeader(key, value)
+              }
+            }
+            r.onload = function() { done(r.responseText) }
+            r.send()
+          }
+
+          // Add the event handler to the node
+          const options = { 
+            capture: true, 
+            once: true
+          }
+          node.addEventListener('htmx:beforeRequest', prefetchEventHandler, options)
+
+          // let HTMX create the request to be intercepted by the event handler
           htmx.ajax('GET', hxGet, {
             source: node,
             handler: function(elt, info) {
