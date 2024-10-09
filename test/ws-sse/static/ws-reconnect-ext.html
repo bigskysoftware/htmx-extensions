@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <script
+      src="https://unpkg.com/htmx.org@2.0.3"
+      integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq"
+      crossorigin="anonymous"
+    ></script>
+    <title>WebSockets Test</title>
+  </head>
+  <body hx-ws="connect:wss://echo.websocket.org">
+    <form hx-ws="send">
+      Send Message to Echo Server...<br />
+      <textarea name="message" style="width: 500px; height: 300px">
+&lt;div id="idMessage"&gt;This Is The Message&lt;div&gt;</textarea
+      >
+      <br /><input type="submit" />
+    </form>
+
+    <!--
+    Receive doesn't work with this `echo` server because of differences in the way HTMX formats
+    `send` messages vs. what it expects for replies.  It has no bearing on the reconnect test.
+
+    <br><hr><br>
+    <div id="idMessage"></div>
+    -->
+  </body>
+</html>
