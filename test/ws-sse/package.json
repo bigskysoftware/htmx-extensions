@@ -1,0 +1,16 @@
+{
+  "name": "ws-sse",
+  "main": "server.mjs",
+  "version": "1.0.0",
+  "description": "This package implements a realtime server for testing WebSockets and Server Sent Events (SSE) in htmx.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bigskysoftware/htmx-extensions.git"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
