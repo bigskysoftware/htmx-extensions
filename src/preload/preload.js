@@ -18,6 +18,17 @@ htmx.defineExtension('preload', {
       return node.getAttribute(property) || node.getAttribute('data-' + property) || attr(node.parentElement, property)
     }
 
+    const isPreloadableFromElement = function (node) {
+      if (node.tagName === 'INPUT') {
+        const preloadableInputTypes = ['checkbox', 'radio', 'submit'];
+        return preloadableInputTypes.some(type => node.getAttribute('type') === type);
+      }
+      if (node.tagName === 'LABEL') {
+        return node.control && isPreloadableFromElement(node.control);
+      }
+      return node.tagName === 'SELECT' || node.tagName === 'BUTTON' || node.type === 'submit';
+    }
+
     // load handles the actual HTTP fetch, and uses htmx.ajax in cases where we're
     // preloading an htmx resource (this sends the same HTTP headers as a regular htmx request)
     var load = function(node) {
@@ -33,6 +44,35 @@ htmx.defineExtension('preload', {
         }
       }
 
+      // Perform an AJAX request
+      var ajaxGetRequest = function (url, source = node, values = undefined) {
+        htmx.ajax('GET', url, {
+          source: source,
+          values: values,
+          handler: function(elt, info) {
+            done(info.xhr.responseText);
+          }
+        });
+      }
+
+      // Enforce original formData element order after modifying it's contents
+      // since cache is sensitive to GET query parameter order
+      var reinforceFormDataOrder = function (formData) {
+        const formElements = node.form.elements;
+        const orderedFormData = new FormData();
+        for(let i = 0; i < formElements.length; i++) {
+          const element = formElements.item(i);
+          if (formData.has(element.name) && element.tagName === 'SELECT') {
+            orderedFormData.append(element.name, formData.get(element.name));
+            continue;
+          }
+          if (formData.has(element.name) && formData.getAll(element.name).includes(element.value)) {
+            orderedFormData.append(element.name, element.value);
+          }
+        }
+        return orderedFormData;
+      }
+
       return function() {
         // If this value has already been loaded, then do not try again.
         if (node.preloadState !== 'READY') {
@@ -45,12 +85,45 @@ htmx.defineExtension('preload', {
         // in the future
         var hxGet = node.getAttribute('hx-get') || node.getAttribute('data-hx-get')
         if (hxGet) {
-          htmx.ajax('GET', hxGet, {
-            source: node,
-            handler: function(elt, info) {
-              done(info.xhr.responseText)
+          ajaxGetRequest(hxGet);
+          return
+        }
+
+        // Handle preloadable form elements - preload form with alternated values
+        if (isPreloadableFromElement(node)) {
+          var hxGet = node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get');
+          if (node.tagName === 'BUTTON' || node.type === 'submit') {
+            ajaxGetRequest(hxGet, source=node.form);
+            return
+          }
+          
+          const inputName = node.name || node.control.name;
+          const formData = htmx.values(node.form);
+          if (node.tagName === 'SELECT') {
+            Array.from(node.options).forEach(option => {
+              if (option.selected) return;
+              formData.set(inputName, option.value);
+              const formDataOrdered = reinforceFormDataOrder(formData);
+              ajaxGetRequest(hxGet, source=node.form, values=formDataOrdered);
+            });
+            return
+          }
+
+          const inputType = node.getAttribute("Type") || node.control.getAttribute("Type");
+          const nodeValue = node.value || node.control.value;
+          if (inputType === 'radio') {
+            formData.set(inputName, nodeValue);
+          } else if (inputType === 'checkbox'){
+            const inputValues = formData.getAll(inputName);
+            if (inputValues.includes(nodeValue)) {
+              formData[inputName] = inputValues.filter(value => value !== nodeValue);
+            } else {
+              formData.append(inputName, nodeValue);
             }
-          })
+
+          }
+          const formDataOrdered = reinforceFormDataOrder(formData);
+          ajaxGetRequest(hxGet, source=node.form, values=formDataOrdered);
           return
         }
 
@@ -69,8 +142,27 @@ htmx.defineExtension('preload', {
     // This function processes a specific node and sets up event handlers.
     // We'll search for nodes and use it below.
     var init = function(node) {
-      // If this node DOES NOT include a "GET" transaction, then there's nothing to do here.
-      if (node.getAttribute('href') + node.getAttribute('hx-get') + node.getAttribute('data-hx-get') == '') {
+      // Add listeners only to nodes which include "GET" transactions
+      // or preloadable "GET" form elements
+      const attributes = ['href', 'hx-get', 'data-hx-get'];
+      const nodeIncludesGetTransaction = attributes.some(a => node.hasAttribute(a));
+      const formIncludesGetTransaction = node.form && attributes.some(a => node.form.hasAttribute(a));
+      if (!(nodeIncludesGetTransaction || (formIncludesGetTransaction && isPreloadableFromElement(node)))) {
+        return
+      }
+
+      // Don't preload <input> elements contained in <label> to prevent sending request twice
+      if (node.tagName === 'INPUT' && node.closest('label')) {
+        return;
+      }
+
+      // Initialize form input elements and bottons
+      if (node.tagName === 'FORM') {
+        for (let i = 0; i < node.elements.length; i++) {
+          const element = node.elements.item(i);
+          init(element);
+          element.labels.forEach(init);
+        }
         return
       }
 
