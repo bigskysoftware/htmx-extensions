@@ -91,9 +91,9 @@ htmx.defineExtension('preload', {
 
         // Handle preloadable form elements - preload form with alternated values
         if (isPreloadableFromElement(node)) {
-          var hxGet = node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get');
+          var hxGet = node.form.getAttribute('action') || node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get');
           if (node.tagName === 'BUTTON' || node.type === 'submit') {
-            ajaxGetRequest(hxGet, source=node.form);
+            ajaxGetRequest(hxGet, node.form);
             return
           }
           
@@ -104,7 +104,7 @@ htmx.defineExtension('preload', {
               if (option.selected) return;
               formData.set(inputName, option.value);
               const formDataOrdered = reinforceFormDataOrder(formData);
-              ajaxGetRequest(hxGet, source=node.form, values=formDataOrdered);
+              ajaxGetRequest(hxGet, node.form, formDataOrdered);
             });
             return
           }
@@ -123,7 +123,7 @@ htmx.defineExtension('preload', {
 
           }
           const formDataOrdered = reinforceFormDataOrder(formData);
-          ajaxGetRequest(hxGet, source=node.form, values=formDataOrdered);
+          ajaxGetRequest(hxGet, node.form, formDataOrdered);
           return
         }
 
@@ -145,9 +145,8 @@ htmx.defineExtension('preload', {
       // Add listeners only to nodes which include "GET" transactions
       // or preloadable "GET" form elements
       const attributes = ['href', 'hx-get', 'data-hx-get'];
-      const nodeIncludesGetTransaction = attributes.some(a => node.hasAttribute(a));
-      const formIncludesGetTransaction = node.form && attributes.some(a => node.form.hasAttribute(a));
-      if (!(nodeIncludesGetTransaction || (formIncludesGetTransaction && isPreloadableFromElement(node)))) {
+      const includesGetTransaction = node => attributes.some(a => node.hasAttribute(a)) || node.method == 'get';
+      if (!(includesGetTransaction(node) || (node.form && includesGetTransaction(node.form) && isPreloadableFromElement(node)))) {
         return
       }
 
@@ -158,6 +157,9 @@ htmx.defineExtension('preload', {
 
       // Initialize form input elements and bottons
       if (node.tagName === 'FORM') {
+        if (node.method !== 'get') {
+          return
+        }
         for (let i = 0; i < node.elements.length; i++) {
           const element = node.elements.item(i);
           init(element);
@@ -182,7 +184,7 @@ htmx.defineExtension('preload', {
 
       // Apply the listener to the node
       node.addEventListener(on, function(evt) {
-        if (node.preloadState === 'PAUSE') { // Only add one event listener
+        if (node.preloadState === 'PAUSE' || always) {
           node.preloadState = 'READY' // Required for the `load` function to trigger
 
           // Special handling for "mouseover" events.  Wait 100ms before triggering load.
@@ -198,7 +200,10 @@ htmx.defineExtension('preload', {
       switch (on) {
         case 'mouseover':
           // Mirror `touchstart` events (fires immediately)
-          node.addEventListener('touchstart', load(node))
+          node.addEventListener('touchstart', function() {
+            node.preloadState = 'READY' // Required for the `load` function to trigger
+            load(node)()
+          })
 
           // WHhen the mouse leaves, immediately disable the preload
           node.addEventListener('mouseout', function(evt) {
@@ -210,7 +215,10 @@ htmx.defineExtension('preload', {
 
         case 'mousedown':
           // Mirror `touchstart` events (fires immediately)
-          node.addEventListener('touchstart', load(node))
+          node.addEventListener('touchstart', function() {
+            node.preloadState = 'READY' // Required for the `load` function to trigger
+            load(node)()
+          })
           break
       }
 
@@ -222,7 +230,10 @@ htmx.defineExtension('preload', {
 
     // Search for all child nodes that have a "preload" attribute
     const parent = event.target || event.detail.elt;
-    parent.querySelectorAll("[preload]").forEach(function(node) {
+    const preloadNodes = [
+      ...parent.hasAttribute("preload") ? [parent] : [],
+      ...parent.querySelectorAll("[preload]")]
+    preloadNodes.forEach(function(node) {
       // Initialize the node with the "preload" attribute
       init(node)
 

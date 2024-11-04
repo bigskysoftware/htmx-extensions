@@ -1,7 +1,8 @@
 {
   "name": "htmx-ext-preload",
   "main": "preload.js",
-  "version": "2.0.1",
+  "version": "3.0.0",
+  "type": "module",
   "scripts": {
     "lint": "eslint test/ext test",
     "lint-fix": "eslint test/ext test --fix",
