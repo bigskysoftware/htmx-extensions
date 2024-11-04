@@ -25,7 +25,6 @@ describe('preload extension handling different trigger events', function() {
     const hyperlink = make('<a href="/test" preload>Link</a>')
 
     htmx.trigger(hyperlink, 'touchstart')
-    this.server.respond()
 
     should.equal(requests.length, 1)
     should.equal(requests[0].url, '/test')
@@ -36,7 +35,6 @@ describe('preload extension handling different trigger events', function() {
 
     htmx.trigger(hyperlink, 'mouseover')
     this.clock.tick(100)
-    this.server.respond()
 
     should.equal(requests.length, 1)
     should.equal(requests[0].url, '/test')
@@ -46,7 +44,6 @@ describe('preload extension handling different trigger events', function() {
     const hyperlink = make('<a href="/test" preload="mouseover">Link</a>')
 
     htmx.trigger(hyperlink, 'touchstart')
-    this.server.respond()
 
     should.equal(requests.length, 1)
     should.equal(requests[0].url, '/test')
@@ -60,7 +57,6 @@ describe('preload extension handling different trigger events', function() {
       htmx.trigger(hyperlink, 'mouseout')
     }, 99)
     this.clock.tick(99)
-    this.server.respond()
 
     should.equal(requests.length, 0)
   })
@@ -70,7 +66,6 @@ describe('preload extension handling different trigger events', function() {
 
     htmx.trigger(hyperlink, 'mouseover')
     this.clock.tick(100)
-    this.server.respond()
 
     should.equal(requests.length, 0)
   })

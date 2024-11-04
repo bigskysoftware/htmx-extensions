@@ -23,7 +23,6 @@ describe('preload extension preloading hyperlinks and hx-get elements', function
     const hyperlink = make('<a href="/test" preload>Link</a>')
 
     htmx.trigger(hyperlink, 'mousedown')
-    this.server.respond()
 
     should.equal(requests.length, 1)
     should.equal(requests[0].url, '/test')
@@ -34,7 +33,6 @@ describe('preload extension preloading hyperlinks and hx-get elements', function
     const hyperlink = byId("link")
 
     htmx.trigger(hyperlink, 'mousedown')
-    this.server.respond()
 
     should.equal(requests.length, 1)
     should.equal(requests[0].url, '/test')
@@ -44,7 +42,6 @@ describe('preload extension preloading hyperlinks and hx-get elements', function
     const hyperlink = make('<a href="/test">Link</a>')
 
     htmx.trigger(hyperlink, 'mousedown')
-    this.server.respond()
 
     should.equal(requests.length, 0)
   })
@@ -53,7 +50,6 @@ describe('preload extension preloading hyperlinks and hx-get elements', function
     const button = make('<button hx-get="/test" preload>Button</button>')
 
     htmx.trigger(button, 'mousedown')
-    this.server.respond()
 
     should.equal(requests.length, 1)
     should.equal(requests[0].url, '/test')
@@ -63,7 +59,6 @@ describe('preload extension preloading hyperlinks and hx-get elements', function
     const button = make('<button hx-get="/test">Button</button>')
 
     htmx.trigger(button, 'mousedown')
-    this.server.respond()
     
     should.equal(requests.length, 0)
   })
@@ -72,7 +67,6 @@ describe('preload extension preloading hyperlinks and hx-get elements', function
     const button = make('<button hx-post="/test">Button</button>')
 
     htmx.trigger(button, 'mousedown')
-    this.server.respond()
     
     should.equal(requests.length, 0)
   })

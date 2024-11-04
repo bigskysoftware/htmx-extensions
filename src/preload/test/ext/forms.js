@@ -31,7 +31,6 @@ describe('preload extension preloading forms', function() {
       const submitButton = form.querySelector("input[type='submit']")
   
       htmx.trigger(submitButton, 'mousedown')
-      this.server.respond()
   
       should.equal(requests.length, 1)
       should.equal(requests[0].url, '/test?name=John')
@@ -47,7 +46,6 @@ describe('preload extension preloading forms', function() {
       const submitButton = form.querySelector("input[type='submit']")
   
       htmx.trigger(submitButton, 'mousedown')
-      this.server.respond()
   
       should.equal(requests.length, 1)
       should.equal(requests[0].url, '/test?name=John')
@@ -63,7 +61,6 @@ describe('preload extension preloading forms', function() {
       const submitButton = form.querySelector("input[type='submit']")
   
       htmx.trigger(submitButton, 'mousedown')
-      this.server.respond()
   
       should.equal(requests.length, 0)
     })
@@ -79,7 +76,6 @@ describe('preload extension preloading forms', function() {
 
       htmx.trigger(visaRadioButton, 'mouseover')
       this.clock.tick(100)
-      this.server.respond()
 
       should.equal(requests.length, 1)
       should.equal(requests[0].url, '/test?card_type=Visa')
@@ -96,7 +92,6 @@ describe('preload extension preloading forms', function() {
 
       htmx.trigger(visaRadioButton, 'mouseover')
       this.clock.tick(100)
-      this.server.respond()
 
       should.equal(requests.length, 1)
       should.equal(requests[0].url, '/test?card_type=Visa')
@@ -113,7 +108,6 @@ describe('preload extension preloading forms', function() {
 
       htmx.trigger(mastercardRadioButton, 'mouseover')
       this.clock.tick(100)
-      this.server.respond()
 
       should.equal(requests.length, 0)
     })
@@ -129,7 +123,6 @@ describe('preload extension preloading forms', function() {
 
       htmx.trigger(visaRadioLabel, 'mouseover')
       this.clock.tick(100)
-      this.server.respond()
 
       should.equal(requests.length, 1)
       should.equal(requests[0].url, '/test?card_type=Visa')
@@ -147,7 +140,6 @@ describe('preload extension preloading forms', function() {
 
       htmx.trigger(musicCheckbox, 'mouseover')
       this.clock.tick(100)
-      this.server.respond()
 
       should.equal(requests.length, 1)
       should.equal(requests[0].url, '/test?interests=Coding&interests=Music&interests=Sports')
@@ -165,7 +157,6 @@ describe('preload extension preloading forms', function() {
 
       htmx.trigger(sportsCheckbox, 'mouseover')
       this.clock.tick(100)
-      this.server.respond()
 
       should.equal(requests.length, 1)
       should.equal(requests[0].url, '/test?interests=Coding')
@@ -186,7 +177,6 @@ describe('preload extension preloading forms', function() {
 
       htmx.trigger(sportsCheckboxLabel, 'mouseover')
       this.clock.tick(100)
-      this.server.respond()
 
       should.equal(requests.length, 1)
       should.equal(requests[0].url, '/test?interests=Coding')
@@ -205,7 +195,6 @@ describe('preload extension preloading forms', function() {
       const select = form.querySelector("select")
 
       htmx.trigger(select, 'mousedown')
-      this.server.respond()
       this.server.respond()
 
       should.equal(requests.length, 2)
