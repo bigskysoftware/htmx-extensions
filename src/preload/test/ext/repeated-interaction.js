@@ -30,6 +30,18 @@ describe('preload extension handles repeated interaction', function() {
     should.equal(requests[0].url, '/test')
   })
 
+  it('preloads hyperlink with preload="always" attribute three times', function() {
+    const hyperlink = make('<a href="/test" preload="always">Link</a>')
+
+    htmx.trigger(hyperlink, 'mousedown')
+    this.server.respond()
+    htmx.trigger(hyperlink, 'mousedown')
+    this.server.respond()
+    htmx.trigger(hyperlink, 'mousedown')
+
+    should.equal(requests.length, 3)
+  })
+
   it('preloads hyperlink with preload="mousedown always" attribute three times', function() {
     const hyperlink = make('<a href="/test" preload="mousedown always">Link</a>')
 
