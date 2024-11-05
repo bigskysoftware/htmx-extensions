@@ -176,17 +176,18 @@ function load(node) {
 
   // Load form elements
   if (isPreloadableFromElement(node)) {
-    const url = node.form.getAttribute('action') || node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get');
-    const standardForm = !(node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get') || hxBoost);
+    const url = node.form.getAttribute('action')
+                || node.form.getAttribute('hx-get')
+                || node.form.getAttribute('data-hx-get');
     const formData = htmx.values(node.form);
+    const isStandardForm = !(node.form.getAttribute('hx-get')
+                            || node.form.getAttribute('data-hx-get')
+                            || hxBoost);
+    const sendGetRequest = isStandardForm ? sendXmlGetRequest : sendHxGetRequest
 
     // submit button
     if (node.tagName === 'BUTTON' || node.type === 'submit') {
-      if (standardForm) {
-        sendXmlGetRequest(url, node.form, formData);
-      } else {
-        sendHxGetRequest(url, node.form);
-      }
+      sendGetRequest(url, node.form, formData)
       return
     }
     
@@ -197,11 +198,7 @@ function load(node) {
         if (option.selected) return;
         formData.set(inputName, option.value);
         const formDataOrdered = forceFormDataInOrder(node.form, formData);
-        if (standardForm) {
-          sendXmlGetRequest(url, node.form, formDataOrdered);
-        } else {
-          sendHxGetRequest(url, node.form, formDataOrdered);
-        }
+        sendGetRequest(url, node.form, formDataOrdered)
       });
       return
     }
@@ -220,11 +217,7 @@ function load(node) {
       }
     }
     const formDataOrdered = forceFormDataInOrder(node.form, formData);
-    if (standardForm) {
-      sendXmlGetRequest(url, node.form, formDataOrdered)
-    } else {
-      sendHxGetRequest(url, node.form, formDataOrdered);
-    }
+    sendGetRequest(url, node.form, formDataOrdered)
     return
   }
 }
@@ -306,10 +299,6 @@ function processResponse(node, responseText) {
   }
 }
 
-//= ===================================================================
-// Utilities
-//= ===================================================================
-
 /**
  * Gets attribute value from node or one of its parents
  * @param {Node} node 
@@ -332,9 +321,13 @@ function getClosestAttribute(node, attribute) {
 function isValidNodeForPreloading(node) {
   // Add listeners only to nodes which include "GET" transactions
   // or preloadable "GET" form elements
-  const targetAttributes = ['href', 'hx-get', 'data-hx-get'];
-  const includesGetTransaction = node => targetAttributes.some(a => node.hasAttribute(a)) || node.method == 'get';
-  if (!(includesGetTransaction(node) || (node.form && includesGetTransaction(node.form) && isPreloadableFromElement(node)))) {
+  const getReqAttrs = ['href', 'hx-get', 'data-hx-get'];
+  const includesGetRequest = node => getReqAttrs.some(a => node.hasAttribute(a))
+                                      || node.method == 'get';
+  const isPreloadableGetFormElement = node.form
+                                      && includesGetRequest(node.form)
+                                      && isPreloadableFromElement(node)
+  if (!includesGetRequest(node) && !isPreloadableFromElement) {
     return false
   }
 
