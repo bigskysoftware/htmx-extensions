@@ -186,7 +186,7 @@ function load(node) {
     const sendGetRequest = isStandardForm ? sendXmlGetRequest : sendHxGetRequest
 
     // submit button
-    if (node.tagName === 'BUTTON' || node.type === 'submit') {
+    if (node.type === 'submit') {
       sendGetRequest(url, node.form, formData)
       return
     }
@@ -357,6 +357,5 @@ function isPreloadableFromElement(node) {
     return node.control && isPreloadableFromElement(node.control);
   }
   return node instanceof HTMLSelectElement
-    || node instanceof HTMLButtonElement
     || node.type === 'submit';
 }
