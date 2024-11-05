@@ -1,4 +1,4 @@
-describe('preload extension preloading linked images', function() {
+describe('preload extension preloads linked images', function() {
   beforeEach(function() {
     this.server = makeServer()
     clearWorkArea()

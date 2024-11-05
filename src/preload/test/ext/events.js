@@ -1,4 +1,4 @@
-describe('preload extension handling different trigger events', function() {
+describe('preload extension handles different trigger events', function() {
   let requests = [];
 
   beforeEach(function() {

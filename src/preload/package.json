@@ -17,9 +17,9 @@
   "devDependencies": {
     "chai": "^4.3.10",
     "chai-dom": "^1.12.0",
+    "htmx.org": "^2.0.2",
     "mocha": "10.1.0",
     "mocha-chrome": "https://github.com/Telroshan/mocha-chrome",
-    "sinon": "^9.2.4",
-    "htmx.org": "^2.0.2"
+    "sinon": "^9.2.4"
   }
 }

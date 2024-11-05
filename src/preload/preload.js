@@ -1,5 +1,5 @@
 // This adds the "preload" extension to htmx.  By default, this will
-// preload the targets of any tags with `href` or `hx-get` attributes
+// preload hyperlinks, forms and any elements with `href` or `hx-get` attributes
 // if they also have a `preload` attribute as well.  See documentation
 // for more details
 htmx.defineExtension('preload', {
@@ -12,10 +12,10 @@ htmx.defineExtension('preload', {
 
     // SOME HELPER FUNCTIONS WE'LL NEED ALONG THE WAY
 
-    // attr gets the closest non-empty value from the attribute.
-    var attr = function(node, property) {
+    // Gets attribute value from node or one of it's parents
+    var getClosestAttribute = function(node, attribute) {
       if (node == undefined) { return undefined }
-      return node.getAttribute(property) || node.getAttribute('data-' + property) || attr(node.parentElement, property)
+      return node.getAttribute(attribute) || node.getAttribute('data-' + attribute) || getClosestAttribute(node.parentElement, attribute)
     }
 
     const isPreloadableFromElement = function (node) {
@@ -39,24 +39,34 @@ htmx.defineExtension('preload', {
           node.preloadState = 'DONE'
         }
 
-        if (attr(node, 'preload-images') == 'true') {
+        if (getClosestAttribute(node, 'preload-images') === 'true') {
           document.createElement('div').innerHTML = html // create and populate a node to load linked resources, too.
         }
       }
 
-      // Perform an AJAX request
-      var ajaxGetRequest = function (url, source = node, values = undefined) {
+      // Send HX-Request with HTMX headers
+      const sendHxGetRequest = function(url, source = node, formData = undefined) {
         htmx.ajax('GET', url, {
           source: source,
-          values: values,
+          values: formData,
           handler: function(elt, info) {
             done(info.xhr.responseText);
           }
         });
       }
 
-      // Enforce original formData element order after modifying it's contents
-      // since cache is sensitive to GET query parameter order
+      // Send standard browser XML request
+      const sendStandardGetRequest = function(url, formData = undefined) {
+        const request = new XMLHttpRequest()
+        if (formData) {
+          url += '?' + new URLSearchParams(formData.entries()).toString()
+        }
+        request.open('GET', url);
+        request.onload = function() { done(request.responseText) }
+        request.send()
+      }
+
+      // Enforce original formData element order because cache is sensitive to parameter order
       var reinforceFormDataOrder = function (formData) {
         const formElements = node.form.elements;
         const orderedFormData = new FormData();
@@ -79,32 +89,48 @@ htmx.defineExtension('preload', {
           return
         }
 
-        // Special handling for HX-GET - use built-in htmx.ajax function
-        // so that headers match other htmx requests, then set
-        // node.preloadState = TRUE so that requests are not duplicated
-        // in the future
-        var hxGet = node.getAttribute('hx-get') || node.getAttribute('data-hx-get')
+        const hxGet = node.getAttribute('hx-get') || node.getAttribute('data-hx-get')
         if (hxGet) {
-          ajaxGetRequest(hxGet);
+          sendHxGetRequest(hxGet);
           return
         }
 
-        // Handle preloadable form elements - preload form with alternated values
+        const hxBoost = getClosestAttribute(node, "hx-boost") === "true"
+        if (node.hasAttribute('href')) {
+          const url = node.getAttribute('href');
+          if (hxBoost) {
+            sendHxGetRequest(url);
+          } else {
+            sendStandardGetRequest(url);
+          }
+          return
+        }
+
         if (isPreloadableFromElement(node)) {
-          var hxGet = node.form.getAttribute('action') || node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get');
+          const url = node.form.getAttribute('action') || node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get');
+          const standardForm = !(node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get') || hxBoost);
+          const formData = htmx.values(node.form);
+
           if (node.tagName === 'BUTTON' || node.type === 'submit') {
-            ajaxGetRequest(hxGet, node.form);
+            if (standardForm) {
+              sendStandardGetRequest(url, formData);
+            } else {
+              sendHxGetRequest(url, node.form);
+            }
             return
           }
           
           const inputName = node.name || node.control.name;
-          const formData = htmx.values(node.form);
           if (node.tagName === 'SELECT') {
             Array.from(node.options).forEach(option => {
               if (option.selected) return;
               formData.set(inputName, option.value);
               const formDataOrdered = reinforceFormDataOrder(formData);
-              ajaxGetRequest(hxGet, node.form, formDataOrdered);
+              if (standardForm) {
+                sendStandardGetRequest(url, formDataOrdered);
+              } else {
+                sendHxGetRequest(url, node.form, formDataOrdered);
+              }
             });
             return
           }
@@ -120,21 +146,14 @@ htmx.defineExtension('preload', {
             } else {
               formData.append(inputName, nodeValue);
             }
-
           }
           const formDataOrdered = reinforceFormDataOrder(formData);
-          ajaxGetRequest(hxGet, node.form, formDataOrdered);
+          if (standardForm) {
+            sendStandardGetRequest(url, formDataOrdered)
+          } else {
+            sendHxGetRequest(url, node.form, formDataOrdered);
+          }
           return
-        }
-
-        // Otherwise, perform a standard xhr request, then set
-        // node.preloadState = TRUE so that requests are not duplicated
-        // in the future.
-        if (node.getAttribute('href')) {
-          var r = new XMLHttpRequest()
-          r.open('GET', node.getAttribute('href'))
-          r.onload = function() { done(r.responseText) }
-          r.send()
         }
       }
     }
@@ -174,7 +193,7 @@ htmx.defineExtension('preload', {
       }
 
       // Get event name from config.
-      var on = attr(node, 'preload') || 'mousedown'
+      var on = getClosestAttribute(node, 'preload') || 'mousedown'
       const always = on.indexOf('always') !== -1
       if (always) {
         on = on.replace('always', '').trim()

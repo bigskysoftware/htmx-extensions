@@ -1,4 +1,4 @@
-describe('preload extension preloading hyperlinks and hx-get elements', function() {
+describe('preload extension preloads hyperlinks and hx-get elements', function() {
   let requests = [];
 
   beforeEach(function() {

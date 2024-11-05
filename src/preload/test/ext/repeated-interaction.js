@@ -1,4 +1,4 @@
-describe('preload extension handling repeated interaction', function() {
+describe('preload extension handles repeated interaction', function() {
   let requests = [];
 
   beforeEach(function() {

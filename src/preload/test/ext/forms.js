@@ -1,4 +1,4 @@
-describe('preload extension preloading forms', function() {
+describe('preload extension preloads forms', function() {
     let requests = [];
   
     beforeEach(function() {
