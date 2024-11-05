@@ -23,6 +23,7 @@ describe('preload extension handles repeated interaction', function() {
     const hyperlink = make('<a href="/test" preload>Link</a>')
 
     htmx.trigger(hyperlink, 'mousedown')
+    this.server.respond()
     htmx.trigger(hyperlink, 'mousedown')
 
     should.equal(requests.length, 1)
@@ -33,7 +34,9 @@ describe('preload extension handles repeated interaction', function() {
     const hyperlink = make('<a href="/test" preload="mousedown always">Link</a>')
 
     htmx.trigger(hyperlink, 'mousedown')
+    this.server.respond()
     htmx.trigger(hyperlink, 'mousedown')
+    this.server.respond()
     htmx.trigger(hyperlink, 'mousedown')
 
     should.equal(requests.length, 3)

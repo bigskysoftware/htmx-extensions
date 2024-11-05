@@ -1,263 +1,369 @@
-// This adds the "preload" extension to htmx.  By default, this will
-// preload hyperlinks, forms and any elements with `href` or `hx-get` attributes
-// if they also have a `preload` attribute as well.  See documentation
-// for more details
-htmx.defineExtension('preload', {
+/**
+ * This adds the "preload" extension to htmx. The extension will 
+  * preload the targets of elements with "preload" attribute if:
+  * - they also have `href`, `hx-get` or `data-hx-get` attributes
+  * - they are radio buttons, checkboxes, select elements and submit
+  *   buttons of forms with `method="get"` or `hx-get` attributes
+  * The extension relies on browser cache and for it to work
+  * server response must include `Cache-Control` header
+  * e.g. `Cache-Control: private, max-age=60`.
+  * For more details @see https://v2-0v2-0.htmx.org/extensions/preload/
+ */
 
+htmx.defineExtension('preload', {
   onEvent: function(name, event) {
-    // Only take actions on "htmx:afterProcessNode"
+    // Process preload attributes on `htmx:afterProcessNode`
     if (name !== 'htmx:afterProcessNode') {
       return
     }
 
-    // SOME HELPER FUNCTIONS WE'LL NEED ALONG THE WAY
-
-    // Gets attribute value from node or one of it's parents
-    var getClosestAttribute = function(node, attribute) {
-      if (node == undefined) { return undefined }
-      return node.getAttribute(attribute) || node.getAttribute('data-' + attribute) || getClosestAttribute(node.parentElement, attribute)
-    }
-
-    const isPreloadableFromElement = function (node) {
-      if (node.tagName === 'INPUT') {
-        const preloadableInputTypes = ['checkbox', 'radio', 'submit'];
-        return preloadableInputTypes.some(type => node.getAttribute('type') === type);
-      }
-      if (node.tagName === 'LABEL') {
-        return node.control && isPreloadableFromElement(node.control);
-      }
-      return node.tagName === 'SELECT' || node.tagName === 'BUTTON' || node.type === 'submit';
-    }
-
-    // load handles the actual HTTP fetch, and uses htmx.ajax in cases where we're
-    // preloading an htmx resource (this sends the same HTTP headers as a regular htmx request)
-    var load = function(node) {
-      // Called after a successful AJAX request, to mark the
-      // content as loaded (and prevent additional AJAX calls.)
-      var done = function(html) {
-        if (!node.preloadAlways) {
-          node.preloadState = 'DONE'
-        }
-
-        if (getClosestAttribute(node, 'preload-images') === 'true') {
-          document.createElement('div').innerHTML = html // create and populate a node to load linked resources, too.
-        }
-      }
-
-      // Send HX-Request with HTMX headers
-      const sendHxGetRequest = function(url, source = node, formData = undefined) {
-        htmx.ajax('GET', url, {
-          source: source,
-          values: formData,
-          handler: function(elt, info) {
-            done(info.xhr.responseText);
-          }
-        });
-      }
-
-      // Send standard browser XML request
-      const sendStandardGetRequest = function(url, formData = undefined) {
-        const request = new XMLHttpRequest()
-        if (formData) {
-          url += '?' + new URLSearchParams(formData.entries()).toString()
-        }
-        request.open('GET', url);
-        request.onload = function() { done(request.responseText) }
-        request.send()
-      }
-
-      // Enforce original formData element order because cache is sensitive to parameter order
-      var reinforceFormDataOrder = function (formData) {
-        const formElements = node.form.elements;
-        const orderedFormData = new FormData();
-        for(let i = 0; i < formElements.length; i++) {
-          const element = formElements.item(i);
-          if (formData.has(element.name) && element.tagName === 'SELECT') {
-            orderedFormData.append(element.name, formData.get(element.name));
-            continue;
-          }
-          if (formData.has(element.name) && formData.getAll(element.name).includes(element.value)) {
-            orderedFormData.append(element.name, element.value);
-          }
-        }
-        return orderedFormData;
-      }
-
-      return function() {
-        // If this value has already been loaded, then do not try again.
-        if (node.preloadState !== 'READY') {
-          return
-        }
-
-        const hxGet = node.getAttribute('hx-get') || node.getAttribute('data-hx-get')
-        if (hxGet) {
-          sendHxGetRequest(hxGet);
-          return
-        }
-
-        const hxBoost = getClosestAttribute(node, "hx-boost") === "true"
-        if (node.hasAttribute('href')) {
-          const url = node.getAttribute('href');
-          if (hxBoost) {
-            sendHxGetRequest(url);
-          } else {
-            sendStandardGetRequest(url);
-          }
-          return
-        }
-
-        if (isPreloadableFromElement(node)) {
-          const url = node.form.getAttribute('action') || node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get');
-          const standardForm = !(node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get') || hxBoost);
-          const formData = htmx.values(node.form);
-
-          if (node.tagName === 'BUTTON' || node.type === 'submit') {
-            if (standardForm) {
-              sendStandardGetRequest(url, formData);
-            } else {
-              sendHxGetRequest(url, node.form);
-            }
-            return
-          }
-          
-          const inputName = node.name || node.control.name;
-          if (node.tagName === 'SELECT') {
-            Array.from(node.options).forEach(option => {
-              if (option.selected) return;
-              formData.set(inputName, option.value);
-              const formDataOrdered = reinforceFormDataOrder(formData);
-              if (standardForm) {
-                sendStandardGetRequest(url, formDataOrdered);
-              } else {
-                sendHxGetRequest(url, node.form, formDataOrdered);
-              }
-            });
-            return
-          }
-
-          const inputType = node.getAttribute("Type") || node.control.getAttribute("Type");
-          const nodeValue = node.value || node.control.value;
-          if (inputType === 'radio') {
-            formData.set(inputName, nodeValue);
-          } else if (inputType === 'checkbox'){
-            const inputValues = formData.getAll(inputName);
-            if (inputValues.includes(nodeValue)) {
-              formData[inputName] = inputValues.filter(value => value !== nodeValue);
-            } else {
-              formData.append(inputName, nodeValue);
-            }
-          }
-          const formDataOrdered = reinforceFormDataOrder(formData);
-          if (standardForm) {
-            sendStandardGetRequest(url, formDataOrdered)
-          } else {
-            sendHxGetRequest(url, node.form, formDataOrdered);
-          }
-          return
-        }
-      }
-    }
-
-    // This function processes a specific node and sets up event handlers.
-    // We'll search for nodes and use it below.
-    var init = function(node) {
-      // Add listeners only to nodes which include "GET" transactions
-      // or preloadable "GET" form elements
-      const attributes = ['href', 'hx-get', 'data-hx-get'];
-      const includesGetTransaction = node => attributes.some(a => node.hasAttribute(a)) || node.method == 'get';
-      if (!(includesGetTransaction(node) || (node.form && includesGetTransaction(node.form) && isPreloadableFromElement(node)))) {
-        return
-      }
-
-      // Don't preload <input> elements contained in <label> to prevent sending request twice
-      if (node.tagName === 'INPUT' && node.closest('label')) {
-        return;
-      }
-
-      // Initialize form input elements and bottons
-      if (node.tagName === 'FORM') {
-        if (node.method !== 'get') {
-          return
-        }
-        for (let i = 0; i < node.elements.length; i++) {
-          const element = node.elements.item(i);
-          init(element);
-          element.labels.forEach(init);
-        }
-        return
-      }
-
-      // Guarantee that we only initialize each node once.
-      if (node.preloadState !== undefined) {
-        return
-      }
-
-      // Get event name from config.
-      var on = getClosestAttribute(node, 'preload') || 'mousedown'
-      const always = on.indexOf('always') !== -1
-      if (always) {
-        on = on.replace('always', '').trim()
-      }
-
-      // FALL THROUGH to here means we need to add an EventListener
-
-      // Apply the listener to the node
-      node.addEventListener(on, function(evt) {
-        if (node.preloadState === 'PAUSE' || always) {
-          node.preloadState = 'READY' // Required for the `load` function to trigger
-
-          // Special handling for "mouseover" events.  Wait 100ms before triggering load.
-          if (on === 'mouseover') {
-            window.setTimeout(load(node), 100)
-          } else {
-            load(node)() // all other events trigger immediately.
-          }
-        }
-      })
-
-      // Special handling for certain built-in event handlers
-      switch (on) {
-        case 'mouseover':
-          // Mirror `touchstart` events (fires immediately)
-          node.addEventListener('touchstart', function() {
-            node.preloadState = 'READY' // Required for the `load` function to trigger
-            load(node)()
-          })
-
-          // WHhen the mouse leaves, immediately disable the preload
-          node.addEventListener('mouseout', function(evt) {
-            if ((evt.target === node) && (node.preloadState === 'READY')) {
-              node.preloadState = 'PAUSE'
-            }
-          })
-          break
-
-        case 'mousedown':
-          // Mirror `touchstart` events (fires immediately)
-          node.addEventListener('touchstart', function() {
-            node.preloadState = 'READY' // Required for the `load` function to trigger
-            load(node)()
-          })
-          break
-      }
-
-      // Mark the node as ready to run.
-      node.preloadState = 'PAUSE'
-      node.preloadAlways = always
-      htmx.trigger(node, 'preload:init') // This event can be used to load content immediately.
-    }
-
-    // Search for all child nodes that have a "preload" attribute
+    // Initialize all nodes with `preload` attribute
     const parent = event.target || event.detail.elt;
     const preloadNodes = [
       ...parent.hasAttribute("preload") ? [parent] : [],
       ...parent.querySelectorAll("[preload]")]
     preloadNodes.forEach(function(node) {
-      // Initialize the node with the "preload" attribute
+      // Initialize the node with the `preload` attribute
       init(node)
 
-      // Initialize all child elements that are anchors or have `hx-get` (use with care)
-      node.querySelectorAll('a,[hx-get],[data-hx-get]').forEach(init)
+      // Initialize all child elements which has
+      // `href`, `hx-get` or `data-hx-get` attributes
+      node.querySelectorAll('[href],[hx-get],[data-hx-get]').forEach(init)
     })
   }
 })
+
+/**
+ * Initialize `node`, set up event handlers based on own or inherited
+ * `preload` attributes and set `node.preloadState` to `READY`.
+ * 
+ * `node.preloadState` can have these values:
+ * - `READY` - event handlers have been set up and
+ *   `TIMEOUT` or `LOADING` will start when a triggering event fires
+ * - `TIMEOUT` - a triggering event has been fired, but `node` is not
+ *   yet being loaded because some time need to pass first e.g. user
+ *   has to keep hovering over an element for 100ms for preload to start
+ * - `LOADING` means that `node` is in the process of being preloaded
+ * - `DONE` means that the preloading process is complete and `node`
+ *    doesn't need a repeated preload (indicated by preload="always")
+ * @param {Node} node
+ */
+function init(node) {
+  // Guarantee that each node is initialized only once
+  if (node.preloadState !== undefined) {
+    return
+  }
+
+  if (!isValidNodeForPreloading(node)) {
+    return
+  }
+
+  // Initialize form element preloading
+  if (node instanceof HTMLFormElement) {
+    const form = node
+    if (form.method !== 'get') {
+      return
+    }
+    for (let i = 0; i < form.elements.length; i++) {
+      const element = form.elements.item(i);
+      init(element);
+      element.labels.forEach(init);
+    }
+    return
+  }
+  
+  // Process node configuration from preload attribute
+  let preloadAttr = getClosestAttribute(node, 'preload');
+  node.preloadAlways = preloadAttr && preloadAttr.includes('always');
+  if (node.preloadAlways) {
+    preloadAttr = preloadAttr.replace('always', '').trim();
+  }
+  let triggerEventName = preloadAttr || 'mousedown';
+
+  // Set up event handlers listening for triggering events
+  const needsTimeout = triggerEventName === 'mouseover'
+  node.addEventListener(triggerEventName, getEventHandler(node, needsTimeout))
+
+  // Add `touchstart` listener for touchsreen support
+  // if `mousedown` or `mouseover` is used
+  if (triggerEventName === 'mousedown' || triggerEventName === 'mouseover') {
+    node.addEventListener('touchstart', getEventHandler(node))
+  }
+
+  // If `mouseover` is used, set up `mouseout` listener,
+  // which will abort preloading if user moves mouse outside
+  // the element in less than 100ms after hovering over it
+  if (triggerEventName === 'mouseover') {
+    node.addEventListener('mouseout', function(evt) {
+      if ((evt.target === node) && (node.preloadState === 'TIMEOUT')) {
+        node.preloadState = 'READY'
+      }
+    })
+  }
+
+  // Mark the node as ready to be preloaded
+  node.preloadState = 'READY'
+
+  // This event can be used to load content immediately
+  htmx.trigger(node, 'preload:init')
+}
+
+/**
+ * Return event handler which can be called by event listener to start
+ * the preloading process of `node` with our without a timeout
+ * @param {Node} node 
+ * @param {boolean=} needsTimeout 
+ * @returns {function(): void}
+ */
+function getEventHandler(node, needsTimeout = false) {
+  return function() {
+    // Do not preload uninitialized nodes, nodes which are in process
+    // of being preloaded or have been preloaded and don't need repeat
+    if (node.preloadState !== 'READY') {
+      return
+    }
+
+    if (needsTimeout) {
+      node.preloadState = 'TIMEOUT'
+      const timeoutMs = 100
+      window.setTimeout(function() {
+        if (node.preloadState === 'TIMEOUT') {
+          node.preloadState = 'READY'
+          load(node)
+        }
+      }, timeoutMs)
+      return
+    }
+
+    load(node)
+  }
+}
+
+/**
+ * Preload the target of node, which can be:
+ *  - hx-get or data-hx-get attribute, preloaded using HTMX request
+ *  - href or form action attribute, preloaded using HTMX request
+ *    if hx-boosted otherwise using XML request
+ * @param {Node} node 
+ */
+function load(node) {
+  // Do not preload uninitialized nodes, nodes which are in process
+  // of being preloaded or have been preloaded and don't need repeat
+  if (node.preloadState !== 'READY') {
+    return
+  }
+  node.preloadState = 'LOADING'
+
+  // Load nodes with `hx-get` or `data-hx-get` attribute
+  // Forms don't reach this because only their elements are initialized
+  const hxGet = node.getAttribute('hx-get') || node.getAttribute('data-hx-get')
+  if (hxGet) {
+    sendHxGetRequest(hxGet, node);
+    return
+  }
+
+  // Load nodes with `href` attribute
+  const hxBoost = getClosestAttribute(node, "hx-boost") === "true"
+  if (node.hasAttribute('href')) {
+    const url = node.getAttribute('href');
+    if (hxBoost) {
+      sendHxGetRequest(url, node);
+    } else {
+      sendXmlGetRequest(url, node);
+    }
+    return
+  }
+
+  // Load form elements
+  if (isPreloadableFromElement(node)) {
+    const url = node.form.getAttribute('action') || node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get');
+    const standardForm = !(node.form.getAttribute('hx-get') || node.form.getAttribute('data-hx-get') || hxBoost);
+    const formData = htmx.values(node.form);
+
+    // submit button
+    if (node.tagName === 'BUTTON' || node.type === 'submit') {
+      if (standardForm) {
+        sendXmlGetRequest(url, node.form, formData);
+      } else {
+        sendHxGetRequest(url, node.form);
+      }
+      return
+    }
+    
+    // select
+    const inputName = node.name || node.control.name;
+    if (node.tagName === 'SELECT') {
+      Array.from(node.options).forEach(option => {
+        if (option.selected) return;
+        formData.set(inputName, option.value);
+        const formDataOrdered = forceFormDataInOrder(node.form, formData);
+        if (standardForm) {
+          sendXmlGetRequest(url, node.form, formDataOrdered);
+        } else {
+          sendHxGetRequest(url, node.form, formDataOrdered);
+        }
+      });
+      return
+    }
+
+    // radio and checkbox
+    const inputType = node.getAttribute("Type") || node.control.getAttribute("Type");
+    const nodeValue = node.value || node.control.value;
+    if (inputType === 'radio') {
+      formData.set(inputName, nodeValue);
+    } else if (inputType === 'checkbox'){
+      const inputValues = formData.getAll(inputName);
+      if (inputValues.includes(nodeValue)) {
+        formData[inputName] = inputValues.filter(value => value !== nodeValue);
+      } else {
+        formData.append(inputName, nodeValue);
+      }
+    }
+    const formDataOrdered = forceFormDataInOrder(node.form, formData);
+    if (standardForm) {
+      sendXmlGetRequest(url, node.form, formDataOrdered)
+    } else {
+      sendHxGetRequest(url, node.form, formDataOrdered);
+    }
+    return
+  }
+}
+
+/**
+ * Force formData values to be in the order of form elements.
+ * This is useful to apply after alternating formData values
+ * and before passing them to a HTTP request because cache is
+ * sensitive to GET parameter order e.g., cached `/link?a=1&b=2`
+ * will not be used for `/link?b=2&a=1`.
+ * @param {HTMLFormElement} form 
+ * @param {FormData} formData 
+ * @returns {FormData}
+ */
+function forceFormDataInOrder(form, formData) {
+  const formElements = form.elements;
+  const orderedFormData = new FormData();
+  for(let i = 0; i < formElements.length; i++) {
+    const element = formElements.item(i);
+    if (formData.has(element.name) && element.tagName === 'SELECT') {
+      orderedFormData.append(
+        element.name, formData.get(element.name));
+      continue;
+    }
+    if (formData.has(element.name) && formData.getAll(element.name)
+      .includes(element.value)) {
+      orderedFormData.append(element.name, element.value);
+    }
+  }
+  return orderedFormData;
+}
+
+/**
+ * Send GET request with `hx-request` headers as if `sourceNode`
+ * target was loaded. Send alternated values if `formData` is set.  
+ * @param {string} url 
+ * @param {Node} sourceNode 
+ * @param {FormData=} formData
+ */
+function sendHxGetRequest(url, sourceNode, formData = undefined) {
+  htmx.ajax('GET', url, {
+    source: sourceNode,
+    values: formData,
+    handler: function(_elt, info) {
+      processResponse(sourceNode, info.xhr.responseText);
+    }
+  });
+}
+
+/**
+ * Send XML GET request to `url`. Send `formData` as URL params if set.
+ * @param {string} url 
+ * @param {FormData=} formData
+ */
+function sendXmlGetRequest(url, sourceNode, formData = undefined) {
+  const request = new XMLHttpRequest()
+  if (formData) {
+    url += '?' + new URLSearchParams(formData.entries()).toString()
+  }
+  request.open('GET', url);
+  request.onload = function() { processResponse(sourceNode, request.responseText) }
+  request.send()
+}
+
+/**
+ * Process request response by marking node `DONE` to prevent repeated
+ * requests, except if preload attribute contains `always`,
+ * and load linked resources (e.g. images) returned in the response 
+ * if `preload-images` attribute is `true`
+ * @param {Node} node 
+ * @param {string} responseText 
+ */
+function processResponse(node, responseText) {
+  node.preloadState = node.preloadAlways ? 'READY' : 'DONE'
+
+  if (getClosestAttribute(node, 'preload-images') === 'true') {
+    // Load linked resources
+    document.createElement('div').innerHTML = responseText
+  }
+}
+
+//= ===================================================================
+// Utilities
+//= ===================================================================
+
+/**
+ * Gets attribute value from node or one of its parents
+ * @param {Node} node 
+ * @param {string} attribute 
+ * @returns { string | undefined }
+ */
+function getClosestAttribute(node, attribute) {
+  if (node == undefined) { return undefined }
+  return node.getAttribute(attribute)
+    || node.getAttribute('data-' + attribute)
+    || getClosestAttribute(node.parentElement, attribute)
+}
+
+/**
+ * Determines if node is valid for preloading and should be
+ * initialized by setting up event listeners and handlers
+ * @param {Node} node 
+ * @returns {boolean}
+ */
+function isValidNodeForPreloading(node) {
+  // Add listeners only to nodes which include "GET" transactions
+  // or preloadable "GET" form elements
+  const targetAttributes = ['href', 'hx-get', 'data-hx-get'];
+  const includesGetTransaction = node => targetAttributes.some(a => node.hasAttribute(a)) || node.method == 'get';
+  if (!(includesGetTransaction(node) || (node.form && includesGetTransaction(node.form) && isPreloadableFromElement(node)))) {
+    return false
+  }
+
+  // Don't preload <input> elements contained in <label>
+  // to prevent sending two requests
+  if (node.tagName === 'INPUT' && node.closest('label')) {
+    return false
+  }
+
+  return true
+}
+
+/**
+ * Determine if node is a form element which can be preloaded,
+ * i.e., `radio`, `checkbox`, `select` or `submit` button
+ * or a `label` of a form element which can be preloaded.
+ * @param {Node} node 
+ * @returns {boolean}
+ */
+function isPreloadableFromElement(node) {
+  if (node instanceof HTMLInputElement) {
+    const preloadableInputTypes = ['checkbox', 'radio', 'submit'];
+    return preloadableInputTypes.some(
+      type => node.getAttribute('type') === type);
+  }
+  if (node.tagName === 'LABEL') {
+    return node.control && isPreloadableFromElement(node.control);
+  }
+  return node instanceof HTMLSelectElement
+    || node instanceof HTMLButtonElement
+    || node.type === 'submit';
+}
