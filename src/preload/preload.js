@@ -7,7 +7,7 @@
   * The extension relies on browser cache and for it to work
   * server response must include `Cache-Control` header
   * e.g. `Cache-Control: private, max-age=60`.
-  * For more details @see https://v2-0v2-0.htmx.org/extensions/preload/
+  * For more details @see https://htmx.org/extensions/preload/
  */
 
 htmx.defineExtension('preload', {
