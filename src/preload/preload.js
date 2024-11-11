@@ -302,6 +302,7 @@ function sendXmlGetRequest(url, sourceNode, formData = undefined) {
     url += '?' + new URLSearchParams(formData.entries()).toString()
   }
   xhr.open('GET', url);
+  xhr.setRequestHeader("HX-Preload", "true")
   xhr.onload = function() { processResponse(sourceNode, xhr.responseText) }
   xhr.send()
 }
