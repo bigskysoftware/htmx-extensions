@@ -21,7 +21,25 @@ describe('preload extension sends requests which match element requests', functi
       clearWorkArea()
     })
 
-    it('matches request for hx-boosted hyperlink to the request when hyperlink is clicked', function() {
+    it('includes HX-Preload header for xh-boosted hyperlink', function() {
+      const hyperlink = make('<a href="/test" hx-boost="true" preload>Link</a>')
+  
+      htmx.trigger(hyperlink, 'mousedown')
+      
+      should.equal(requests.length, 1)
+      requests[0].requestHeaders.should.deep.contain({"HX-Preload": "true"})
+    })
+
+    it('includes HX-Preload header for button with hx-get attribute', function() {
+      const button = make('<button hx-get="/test" preload>Button</button>')
+
+      htmx.trigger(button, 'mousedown')
+  
+      should.equal(requests.length, 1)
+      requests[0].requestHeaders.should.deep.contain({"HX-Preload": "true"})
+    })
+
+    it('matches url and includes headers for hx-boosted hyperlink', function() {
       const hyperlink = make('<a href="/test" hx-boost="true" preload>Link</a>')
   
       htmx.trigger(hyperlink, 'mousedown')
@@ -31,10 +49,10 @@ describe('preload extension sends requests which match element requests', functi
       should.equal(requests.length, 2)
       should.equal(requests[0].url, requests[1].url)
       should.equal(requests[0].method, requests[1].method)
-      requests[0].requestHeaders.should.deep.equal(requests[1].requestHeaders)
+      requests[0].requestHeaders.should.deep.contain(requests[1].requestHeaders)
     })
 
-    it('matches request for hx-boosted form to the request when form is submitted', function(){
+    it('matches url and includes headers for hx-boosted form', function(){
       const form = make(`
         <form action="/test" method="get" hx-boost="true" preload>
           <input type="text" name="name" value="John">
@@ -50,10 +68,10 @@ describe('preload extension sends requests which match element requests', functi
       should.equal(requests.length, 2)
       should.equal(requests[0].url, requests[1].url)
       should.equal(requests[0].method, requests[1].method)
-      requests[0].requestHeaders.should.deep.equal(requests[1].requestHeaders)
+      requests[0].requestHeaders.should.deep.contain(requests[1].requestHeaders)
     })
 
-    it('matches request for hx-get button to the request when button is clicked', function() {
+    it('matches url and includes headers for hx-get button', function() {
       const button = make('<button hx-get="/test" preload>Button</button>')
   
       htmx.trigger(button, 'mousedown')
@@ -63,10 +81,10 @@ describe('preload extension sends requests which match element requests', functi
       should.equal(requests.length, 2)
       should.equal(requests[0].url, requests[1].url)
       should.equal(requests[0].method, requests[1].method)
-      requests[0].requestHeaders.should.deep.equal(requests[1].requestHeaders)
+      requests[0].requestHeaders.should.deep.contain(requests[1].requestHeaders)
     })
 
-    it('matches request for hx-get form to the request when form is submitted', function(){
+    it('matches url and includes headers for hx-get form', function(){
       const form = make(`
         <form hx-get="/test" preload>
           <input type="text" name="name" value="John">
@@ -82,10 +100,10 @@ describe('preload extension sends requests which match element requests', functi
       should.equal(requests.length, 2)
       should.equal(requests[0].url, requests[1].url)
       should.equal(requests[0].method, requests[1].method)
-      requests[0].requestHeaders.should.deep.equal(requests[1].requestHeaders)
+      requests[0].requestHeaders.should.deep.contain(requests[1].requestHeaders)
     })
 
-    it('matches request for checkbox label in a form with multiple fields to the request when label is clicked', function(){
+    it('matches url and includes headers for checkbox label in a form with multiple fields', function(){
       const form = make(`
         <form hx-get="/test" hx-trigger="change" preload="mouseover">
           <div>
@@ -115,7 +133,7 @@ describe('preload extension sends requests which match element requests', functi
       should.equal(requests.length, 2)
       should.equal(requests[0].url, requests[1].url)
       should.equal(requests[0].method, requests[1].method)
-      requests[0].requestHeaders.should.deep.equal(requests[1].requestHeaders)
+      requests[0].requestHeaders.should.deep.contain(requests[1].requestHeaders)
     })
   })
   

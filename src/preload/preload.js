@@ -13,23 +13,44 @@
 htmx.defineExtension('preload', {
   onEvent: function(name, event) {
     // Process preload attributes on `htmx:afterProcessNode`
-    if (name !== 'htmx:afterProcessNode') {
+    if (name === 'htmx:afterProcessNode') {
+      // Initialize all nodes with `preload` attribute
+      const parent = event.target || event.detail.elt;
+      const preloadNodes = [
+        ...parent.hasAttribute("preload") ? [parent] : [],
+        ...parent.querySelectorAll("[preload]")]
+      preloadNodes.forEach(function(node) {
+        // Initialize the node with the `preload` attribute
+        init(node)
+
+        // Initialize all child elements which has
+        // `href`, `hx-get` or `data-hx-get` attributes
+        node.querySelectorAll('[href],[hx-get],[data-hx-get]').forEach(init)
+      })
       return
     }
 
-    // Initialize all nodes with `preload` attribute
-    const parent = event.target || event.detail.elt;
-    const preloadNodes = [
-      ...parent.hasAttribute("preload") ? [parent] : [],
-      ...parent.querySelectorAll("[preload]")]
-    preloadNodes.forEach(function(node) {
-      // Initialize the node with the `preload` attribute
-      init(node)
+    // Intercept HTMX preload requests on `htmx:beforeRequest` and
+    // send them as XHR requests instead to avoid side-effects,
+    // such as showing loading indicators while preloading data. 
+    if (name === 'htmx:beforeRequest') {
+      const requestHeaders = event.detail.requestConfig.headers
+      if (!("HX-Preload" in requestHeaders
+            && requestHeaders["HX-Preload"] === "true")) {
+        return
+      }
 
-      // Initialize all child elements which has
-      // `href`, `hx-get` or `data-hx-get` attributes
-      node.querySelectorAll('[href],[hx-get],[data-hx-get]').forEach(init)
-    })
+      event.preventDefault()
+      // Reuse XHR created by HTMX with replaced callbacks
+      const xhr = event.detail.xhr
+      xhr.onload = function() {
+        processResponse(event.detail.elt, xhr.responseText)
+      }
+      xhr.onerror = null
+      xhr.onabort = null
+      xhr.ontimeout = null
+      xhr.send()
+    }
   }
 })
 
@@ -252,7 +273,12 @@ function forceFormDataInOrder(form, formData) {
 
 /**
  * Send GET request with `hx-request` headers as if `sourceNode`
- * target was loaded. Send alternated values if `formData` is set.  
+ * target was loaded. Send alternated values if `formData` is set.
+ * 
+ * Note that this request is intercepted and sent as XMLHttpRequest.
+ * It is necessary to use `htmx.ajax` to acquire correct headers which
+ * HTMX and extensions add based on `sourceNode`. But it cannot be used
+ * to perform the request due to side-effects e.g. loading indicators. 
  * @param {string} url 
  * @param {Node} sourceNode 
  * @param {FormData=} formData
@@ -261,9 +287,7 @@ function sendHxGetRequest(url, sourceNode, formData = undefined) {
   htmx.ajax('GET', url, {
     source: sourceNode,
     values: formData,
-    handler: function(_elt, info) {
-      processResponse(sourceNode, info.xhr.responseText);
-    }
+    headers: {"HX-Preload": "true"}
   });
 }
 
@@ -273,13 +297,13 @@ function sendHxGetRequest(url, sourceNode, formData = undefined) {
  * @param {FormData=} formData
  */
 function sendXmlGetRequest(url, sourceNode, formData = undefined) {
-  const request = new XMLHttpRequest()
+  const xhr = new XMLHttpRequest()
   if (formData) {
     url += '?' + new URLSearchParams(formData.entries()).toString()
   }
-  request.open('GET', url);
-  request.onload = function() { processResponse(sourceNode, request.responseText) }
-  request.send()
+  xhr.open('GET', url);
+  xhr.onload = function() { processResponse(sourceNode, xhr.responseText) }
+  xhr.send()
 }
 
 /**
