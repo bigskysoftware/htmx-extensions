@@ -35,8 +35,8 @@ htmx.defineExtension('preload', {
     // such as showing loading indicators while preloading data. 
     if (name === 'htmx:beforeRequest') {
       const requestHeaders = event.detail.requestConfig.headers
-      if (!("HX-Preload" in requestHeaders
-            && requestHeaders["HX-Preload"] === "true")) {
+      if (!("HX-Preloaded" in requestHeaders
+            && requestHeaders["HX-Preloaded"] === "true")) {
         return
       }
 
@@ -287,7 +287,7 @@ function sendHxGetRequest(url, sourceNode, formData = undefined) {
   htmx.ajax('GET', url, {
     source: sourceNode,
     values: formData,
-    headers: {"HX-Preload": "true"}
+    headers: {"HX-Preloaded": "true"}
   });
 }
 
@@ -302,7 +302,7 @@ function sendXmlGetRequest(url, sourceNode, formData = undefined) {
     url += '?' + new URLSearchParams(formData.entries()).toString()
   }
   xhr.open('GET', url);
-  xhr.setRequestHeader("HX-Preload", "true")
+  xhr.setRequestHeader("HX-Preloaded", "true")
   xhr.onload = function() { processResponse(sourceNode, xhr.responseText) }
   xhr.send()
 }

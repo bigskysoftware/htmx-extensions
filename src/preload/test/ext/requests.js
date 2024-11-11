@@ -21,31 +21,31 @@ describe('preload extension sends requests which match element requests', functi
       clearWorkArea()
     })
 
-    it('includes HX-Preload header when preloading hyperlink', function() {
+    it('includes HX-Preloaded header when preloading hyperlink', function() {
       const hyperlink = make('<a href="/test" preload>Link</a>')
   
       htmx.trigger(hyperlink, 'mousedown')
       
       should.equal(requests.length, 1)
-      requests[0].requestHeaders.should.deep.contain({"HX-Preload": "true"})
+      requests[0].requestHeaders.should.deep.contain({"HX-Preloaded": "true"})
     })
 
-    it('includes HX-Preload header when preloading xh-boosted hyperlink', function() {
+    it('includes HX-Preloaded header when preloading xh-boosted hyperlink', function() {
       const hyperlink = make('<a href="/test" hx-boost="true" preload>Link</a>')
   
       htmx.trigger(hyperlink, 'mousedown')
       
       should.equal(requests.length, 1)
-      requests[0].requestHeaders.should.deep.contain({"HX-Preload": "true"})
+      requests[0].requestHeaders.should.deep.contain({"HX-Preloaded": "true"})
     })
 
-    it('includes HX-Preload header when preloading button with hx-get attribute', function() {
+    it('includes HX-Preloaded header when preloading button with hx-get attribute', function() {
       const button = make('<button hx-get="/test" preload>Button</button>')
 
       htmx.trigger(button, 'mousedown')
   
       should.equal(requests.length, 1)
-      requests[0].requestHeaders.should.deep.contain({"HX-Preload": "true"})
+      requests[0].requestHeaders.should.deep.contain({"HX-Preloaded": "true"})
     })
 
     it('matches url and includes headers for hx-boosted hyperlink', function() {
