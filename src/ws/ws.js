@@ -411,8 +411,12 @@ This extension adds support for WebSockets to htmx.  See /www/extensions/ws.md f
    */
   function maybeCloseWebSocketSource(elt) {
     if (!api.bodyContains(elt)) {
-      api.getInternalData(elt).webSocket.close()
-      return true
+      var internalData = api.getInternalData(elt)
+      if (internalData.webSocket) {
+        internalData.webSocket.close()
+        return true
+      }
+      return false
     }
     return false
   }
