@@ -135,4 +135,4 @@ may instead use the `x` character, e.g., `hx-target-4xx`._
 
 ## See also
 
-* [`hx-target`](https://htmx.org/reference/hx-target.md), specifies the target element to be swapped
+* [`hx-target`](https://htmx.org/attributes/hx-target/), specifies the target element to be swapped

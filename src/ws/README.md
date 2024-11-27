@@ -48,7 +48,7 @@ WebSockets extension support two configuration options:
 The example above establishes a WebSocket to the `/chatroom` end point. Content that is sent down from the websocket
 will
 be parsed as HTML and swapped in by the `id` property, using the same logic
-as [Out of Band Swaps](https://htmx.org/reference/hx-swap-oob.md).
+as [Out of Band Swaps](https://htmx.org/attributes/hx-swap-oob/).
 
 As such, if you want to change the swapping method (e.g., append content at the end of an element or delegate swapping
 to an extension),
@@ -178,7 +178,7 @@ If the event is cancelled, no further processing will occur and no messages will
 
 * `detail.parameters` - the parameters that will be submitted in the request
 * `detail.unfilteredParameters` - the parameters that were found before filtering
-  by [`hx-select`](https://htmx.org/reference/hx-select.md)
+  by [`hx-select`](https://htmx.org/attributes/hx-select)
 * `detail.headers` - the request headers. Will be attached to the body in `HEADERS` property, if not falsy
 * `detail.errors` - validation errors. Will prevent sending and
   trigger [`htmx:validation:halted`](https://htmx.org/events#htmx:validation:halted) event if not empty
