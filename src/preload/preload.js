@@ -59,8 +59,7 @@ htmx.defineExtension('preload', {
  * `preload` attributes and set `node.preloadState` to `READY`.
  * 
  * `node.preloadState` can have these values:
- * - `READY` - event handlers have been set up and
- *   `TIMEOUT` or `LOADING` will start when a triggering event fires
+ * - `READY` - event handlers have been set up and node is ready to preload
  * - `TIMEOUT` - a triggering event has been fired, but `node` is not
  *   yet being loaded because some time need to pass first e.g. user
  *   has to keep hovering over an element for 100ms for preload to start
@@ -82,7 +81,9 @@ function init(node) {
   // Initialize form element preloading
   if (node instanceof HTMLFormElement) {
     const form = node
-    if (form.method !== 'get') {
+    // Only initialize forms with `method="get"` or `hx-get` attributes
+    if (!((form.hasAttribute('method') && form.method === 'get')
+      || form.hasAttribute('hx-get') || form.hasAttribute('hx-data-get'))) {
       return
     }
     for (let i = 0; i < form.elements.length; i++) {
@@ -162,9 +163,8 @@ function getEventHandler(node, needsTimeout = false) {
 
 /**
  * Preload the target of node, which can be:
- *  - hx-get or data-hx-get attribute, preloaded using HTMX request
- *  - href or form action attribute, preloaded using HTMX request
- *    if hx-boosted otherwise using XML request
+ *  - hx-get or data-hx-get attribute
+ *  - href or form action attribute
  * @param {Node} node 
  */
 function load(node) {

@@ -21,7 +21,7 @@ describe('preload extension preloads forms', function() {
       clearWorkArea()
     })
   
-    it('preloads form with method="get" and preload attribute on submit button mousedown', function() {
+    it('preloads form with method="get" and preload attribute', function() {
       const form = make(`
         <form action="/test" method="get" preload>
           <input type="text" name="name" value="John">
@@ -36,7 +36,7 @@ describe('preload extension preloads forms', function() {
       should.equal(requests[0].url, '/test?name=John')
     })
   
-    it('preloads form with hx-get and preload attribute on submit button mousedown', function() {
+    it('preloads form with hx-get and preload attribute', function() {
       const form = make(`
         <form hx-get="/test" preload>
           <input type="text" name="name" value="John">
@@ -54,6 +54,21 @@ describe('preload extension preloads forms', function() {
     it('does not preload form with method="post" and preload attribute', function() {
       const form = make(`
         <form action="/test" method="post" preload>
+          <input type="text" name="name" value="John">
+          <input type="submit" value="Submit">
+        </form>
+      `)
+      const submitButton = form.querySelector("input[type='submit']")
+  
+      htmx.trigger(submitButton, 'mousedown')
+  
+      should.equal(requests.length, 0)
+    })
+
+    it('does not preload form with hx-post and preload attribute', function() {
+      console.log("THIS")
+      const form = make(`
+        <form hx-post="/test" preload>
           <input type="text" name="name" value="John">
           <input type="submit" value="Submit">
         </form>
