@@ -66,7 +66,6 @@ describe('preload extension preloads forms', function() {
     })
 
     it('does not preload form with hx-post and preload attribute', function() {
-      console.log("THIS")
       const form = make(`
         <form hx-post="/test" preload>
           <input type="text" name="name" value="John">
