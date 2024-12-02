@@ -618,6 +618,17 @@ describe('web-sockets extension', function() {
     this.messages[1].should.contains('"action":"B"')
   })
 
+  it('maybeClose does not raise when there is no socket', function() {
+    var div = make('<div hx-ext="ws" ws-connect="ws://localhost:8080"><div id="d1">div1</div></div>')
+    this.tickMock()
+    var internalData = div['htmx-internal-data']
+    should.exist(internalData.webSocket)
+    delete internalData.webSocket
+    should.not.exist(internalData.webSocket)
+    div.parentNode.removeChild(div)
+    this.tickMock()
+  })
+
   describe('Send immediately', function() {
     function checkCallForWsBeforeSend(spy, wrapper, message, target) {
       // Utility function to always check the same for htmx:wsBeforeSend caught by a spy

@@ -2,7 +2,8 @@
 
 [htmx](https://htmx.org) provides an extension mechanism for defining and using extensions within htmx-based applications.
 A list of extensions can be found at <https://htmx.org/extensions>.  If you wish to contribute an extension to that
-list, open a PR request against <https://github.com/bigskysoftware/htmx-extensions/blob/dev/www/index.html>.
+list, open a PR request against <https://github.com/bigskysoftware/htmx/blob/master/www/content/extensions/_index.md>,
+or check out our [contribution guidelines](CONTRIBUTING.md) for contributions to existing extensions.
 
 ## Using Extensions
 
