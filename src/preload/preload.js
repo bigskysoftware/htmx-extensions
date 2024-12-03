@@ -359,8 +359,9 @@
     }
 
     // Don't preload <input> elements contained in <label>
-    // to prevent sending two requests
-    if (node.tagName instanceof HTMLInputElement && node.closest('label')) {
+    // to prevent sending two requests. Interaction on <input> in a
+    // <label><input></input></label> situation activates <label> too.
+    if (node instanceof HTMLInputElement && node.closest('label')) {
       return false
     }
 

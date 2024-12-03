@@ -215,5 +215,19 @@ describe('preload extension preloads forms', function() {
       should.equal(requests[0].url, '/test?pet=cat')
       should.equal(requests[1].url, '/test?pet=dinosaur')
     })
+
+    it('sends only one preload request when activating input contained in a label', function() {
+      const form = make(`
+        <form hx-get="/test" preload="mouseover">
+          <label><input type="radio" name="card_type" value="Visa"> Visa</label>
+        </form>
+      `)
+      const visaRadio = form.querySelector("input[value='Visa']")
+
+      htmx.trigger(visaRadio, 'mouseover')
+      this.clock.tick(100)
+
+      should.equal(requests.length, 1)
+    })
   })
   
