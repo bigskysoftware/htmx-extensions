@@ -376,7 +376,7 @@
    * @returns {boolean}
    */
   function isPreloadableFormElement(node) {
-    if (node instanceof HTMLInputElement) {
+    if (node instanceof HTMLInputElement || node instanceof HTMLButtonElement) {
       const type = node.getAttribute('type');
       return ['checkbox', 'radio', 'submit'].includes(type);
     }

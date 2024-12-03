@@ -79,6 +79,21 @@ describe('preload extension preloads forms', function() {
       should.equal(requests.length, 0)
     })
 
+    it('preloads <button type="submit">', function() {
+      const form = make(`
+        <form hx-get="/test" preload>
+          <input type="text" name="name" value="John">
+          <button type="submit" value="Submit">Submit</button>
+        </form>
+      `)
+      const submitButton = form.querySelector("button[type='submit']")
+  
+      htmx.trigger(submitButton, 'mousedown')
+  
+      should.equal(requests.length, 1)
+      should.equal(requests[0].url, '/test?name=John')
+    })
+
     it('preloads radio button inheriting preload from parent form', function() {
       const form = make(`
         <form hx-get="/test" preload="mouseover">
