@@ -8,6 +8,7 @@ describe('preload extension handles repeated interaction', function() {
       defaultOnCreateFunction(xhr)
       requests.push(xhr)
     }
+    this.clock = sinon.useFakeTimers()
     clearWorkArea()
     getWorkArea().setAttribute('hx-ext', 'preload')
   })
@@ -15,6 +16,7 @@ describe('preload extension handles repeated interaction', function() {
   afterEach(function() {
     this.server.restore()
     requests = []
+    this.clock.restore()
     getWorkArea().removeAttribute('hx-ext')
     clearWorkArea()
   })
@@ -50,6 +52,33 @@ describe('preload extension handles repeated interaction', function() {
     htmx.trigger(hyperlink, 'mousedown')
     this.server.respond()
     htmx.trigger(hyperlink, 'mousedown')
+
+    should.equal(requests.length, 3)
+  })
+
+  it('preloads hyperlink with preload="always mousedown" attribute three times', function() {
+    const hyperlink = make('<a href="/test" preload="always mousedown">Link</a>')
+
+    htmx.trigger(hyperlink, 'mousedown')
+    this.server.respond()
+    htmx.trigger(hyperlink, 'mousedown')
+    this.server.respond()
+    htmx.trigger(hyperlink, 'mousedown')
+
+    should.equal(requests.length, 3)
+  })
+
+  it('preloads hyperlink with preload="mouseover always" attribute three times', function() {
+    const hyperlink = make('<a href="/test" preload="mouseover always">Link</a>')
+
+    htmx.trigger(hyperlink, 'mouseover')
+    this.clock.tick(100)
+    this.server.respond()
+    htmx.trigger(hyperlink, 'mouseover')
+    this.clock.tick(100)
+    this.server.respond()
+    htmx.trigger(hyperlink, 'mouseover')
+    this.clock.tick(100)
 
     should.equal(requests.length, 3)
   })
