@@ -1,7 +1,7 @@
 {
   "name": "htmx-ext-preload",
   "main": "preload.js",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "scripts": {
     "lint": "eslint test/ext test",
     "lint-fix": "eslint test/ext test --fix",
@@ -19,6 +19,6 @@
     "mocha": "10.1.0",
     "mocha-chrome": "https://github.com/Telroshan/mocha-chrome",
     "sinon": "^9.2.4",
-    "htmx.org": "^2.0.2"
+    "htmx.org": "^2.0.3"
   }
 }
