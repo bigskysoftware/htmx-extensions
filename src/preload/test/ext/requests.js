@@ -144,5 +144,14 @@ describe('preload extension sends requests which match element requests', functi
       should.equal(requests[0].method, requests[1].method)
       requests[0].requestHeaders.should.deep.contain(requests[1].requestHeaders)
     })
+
+    it('does not include HX-Preloaded header when clicking hx-boosted and preloaded hyperlink', function() {
+      const hyperlink = make('<a href="/test" hx-boost="true" preload>Link</a>')
+  
+      hyperlink.click()
+      
+      should.equal(requests.length, 1)
+      requests[0].requestHeaders.should.not.deep.contain({"HX-Preloaded": "true"})
+    })
   })
   
