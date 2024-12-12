@@ -115,9 +115,12 @@
             api = apiRef;
 
             htmx.on('htmx:afterSwap', function(evt){
-                var serverResponse = evt.detail.xhr.response;
-                if (api.triggerEvent(document.body, "htmx:beforeHeadMerge", evt.detail)) {
-                    mergeHead(serverResponse, evt.detail.boosted ? "merge" : "append");
+                let xhr = evt.detail.xhr;
+                if (xhr) {
+                    var serverResponse = xhr.response;
+                    if (api.triggerEvent(document.body, "htmx:beforeHeadMerge", evt.detail)) {
+                        mergeHead(serverResponse, evt.detail.boosted ? "merge" : "append");
+                    }
                 }
             })
 
