@@ -1,5 +1,6 @@
 #!/bin/bash
-# This script must be run from npm, via `npm run dist`, in order to access the `uglifyjs` command
+# This script must be run from `npm run dist` in order to access `node` and `uglifyjs` commands
+# Make sure you have the permissions to execute the file with `chmod +x scripts/dist-all.sh`
 set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -25,22 +26,8 @@ for dir in $SCRIPT_DIR/../src/*; do
             # Generate gzipped script
             gzip -9 -k -f dist/$EXTENSION_NAME.min.js > dist/$EXTENSION_NAME.min.js.gz
 
-            # Generate AMD script
-            cat > dist/$EXTENSION_NAME.amd.js << EOF
-require(['htmx'], htmx => {
-$(cat $EXTENSION_SRC)
-})
-EOF
-
-
-            # Generate CJS script
-            cat > dist/htmx.cjs.js << EOF
-const htmx = require('htmx.org');
-$(cat $EXTENSION_SRC)
-EOF
-
             # Generate ESM script
-            cat > dist/htmx.esm.js << EOF
+            cat > dist/$EXTENSION_NAME.esm.js << EOF
 import htmx from 'htmx.org';
 $(cat $EXTENSION_SRC)
 EOF
