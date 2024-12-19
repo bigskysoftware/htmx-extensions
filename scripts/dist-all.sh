@@ -50,7 +50,7 @@ EOF
             echo "$EXTENSION_NAME distribution files generated"
             SRI_HASH=`openssl dgst -sha384 -binary $dir/dist/$EXTENSION_NAME.min.js | openssl base64 -A`
             VERSION=`node -p -e "require('$dir/package.json').version"`
-            echo "<script src=\"https://unpkg.com/$EXTENSION_NAME@$VERSION\" integrity=\"sha384-$SRI_HASH\" crossorigin=\"anonymous\"></script>"
+            echo "<script src=\"https://unpkg.com/htmx-ext-$EXTENSION_NAME@$VERSION\" integrity=\"sha384-$SRI_HASH\" crossorigin=\"anonymous\"></script>"
         )
         cd ../..
     else
