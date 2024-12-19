@@ -1,0 +1,10 @@
+{
+    "name": "htmx-extensions",
+    "version": "1.0.0",
+    "scripts": {
+      "dist": "./scripts/dist-all.sh"
+    },
+    "devDependencies": {
+      "uglify-js": "^3.17.4"
+    }
+}

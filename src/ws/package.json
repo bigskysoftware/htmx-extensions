@@ -1,7 +1,9 @@
 {
   "name": "htmx-ext-ws",
-  "main": "ws.js",
   "version": "2.0.2",
+  "homepage": "https://htmx.org/extensions/ws/",
+  "main": "dist/ws.esm.js",
+  "unpkg": "dist/ws.min.js",
   "scripts": {
     "lint": "eslint test/ext test",
     "lint-fix": "eslint test/ext test --fix",
@@ -13,13 +15,15 @@
     "type": "git",
     "url": "git+https://github.com/bigskysoftware/htmx-extensions.git"
   },
+  "dependencies": {
+    "htmx.org": "^2.0.2"
+  },
   "devDependencies": {
     "chai": "^4.3.10",
     "chai-dom": "^1.12.0",
     "mocha": "10.1.0",
     "mocha-chrome": "https://github.com/Telroshan/mocha-chrome",
     "mock-socket": "^9.3.1",
-    "sinon": "^9.2.4",
-    "htmx.org": "^2.0.2"
+    "sinon": "^9.2.4"
   }
 }

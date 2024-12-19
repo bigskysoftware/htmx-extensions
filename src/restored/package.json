@@ -1,7 +1,8 @@
 {
   "name": "htmx-ext-restored",
-  "main": "restored.js",
   "version": "2.0.0",
+  "main": "dist/restored.esm.js",
+  "unpkg": "dist/restored.min.js",
   "scripts": {
     "lint": "eslint test/ext test",
     "lint-fix": "eslint test/ext test --fix",
@@ -12,6 +13,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bigskysoftware/htmx-extensions.git"
+  },
+  "dependencies": {
+    "htmx.org": "^2.0.2"
   },
   "devDependencies": {
     "chai": "^4.3.10",

@@ -1,7 +1,9 @@
 {
   "name": "htmx-ext-sse",
-  "main": "sse.js",
   "version": "2.2.2",
+  "homepage": "https://htmx.org/extensions/sse/",
+  "main": "dist/sse.esm.js",
+  "unpkg": "dist/sse.min.js",
   "scripts": {
     "lint": "eslint test/ext test",
     "lint-fix": "eslint test/ext test --fix",
@@ -12,6 +14,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bigskysoftware/htmx-extensions.git"
+  },
+  "dependencies": {
+    "htmx.org": "^2.0.2"
   },
   "devDependencies": {
     "chai": "^4.3.10",
