@@ -44,9 +44,17 @@ EOF
 import htmx from 'htmx.org';
 $(cat $EXTENSION_SRC)
 EOF
+
+            # Print success message and updated script tag with SRI hash
+            echo
+            echo "$EXTENSION_NAME distribution files generated"
+            SRI_HASH=`openssl dgst -sha384 -binary $dir/dist/$EXTENSION_NAME.min.js | openssl base64 -A`
+            VERSION=`node -p -e "require('$dir/package.json').version"`
+            echo "<script src=\"https://unpkg.com/$EXTENSION_NAME@$VERSION\" integrity=\"sha384-$SRI_HASH\" crossorigin=\"anonymous\"></script>"
         )
         cd ../..
     else
-        echo "Extension source file "$dir/$(basename "$dir").js" doesn't exist"
+        echo
+        echo "Extension source file "$EXTENSION_NAME.js" doesn't exist"
     fi
 done
