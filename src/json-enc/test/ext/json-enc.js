@@ -143,7 +143,7 @@ describe('json-enc extension', function() {
       xhr.respond(200, {}, 'clicked')
     })
 
-    make(`<form hx-ext="json-enc" hx-post="/test" hx-vals="js:{'obj': {'x': 123}, 'number': 5000, 'numberString': '5000'}">
+    make(`<form hx-ext="json-enc" hx-post="/test" hx-vals="js:{'obj': {'x': 123}, 'number': 5000, 'numberString': '5000', 'array': ['text', 123, {'key': 'value'}]}">
              <button id="btn" type="submit">Submit</button>
           </form>`)
     var btn = byId('btn')
@@ -153,6 +153,7 @@ describe('json-enc extension', function() {
     values.number.should.equal(5000)
     values.numberString.should.equal('5000')
     chai.assert.deepEqual(values.obj, {'x': 123})
+    chai.assert.deepEqual(values.array, ['text', 123, {'key': 'value'}])
   })
 
   it('handles multiple values per key', function() {
