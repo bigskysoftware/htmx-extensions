@@ -14,20 +14,27 @@
     encodeParameters: function(xhr, parameters, elt) {
       xhr.overrideMimeType('text/json')
 
-      const vals = api.getExpressionVars(elt)
-      const object = {}
-      parameters.forEach(function(value, key) {
-        // FormData encodes values as strings, restore hx-vals/hx-vars with their initial types
-        const typedValue = Object.hasOwn(vals, key) ? vals[key] : value
-        if (Object.hasOwn(object, key)) {
-          if (!Array.isArray(object[key])) {
-            object[key] = [object[key]]
+      // group FormData parameters by key
+      const groupedParameters = Array.from(parameters.entries()).reduce((grouped, [key, value]) => {
+        if (Object.hasOwn(grouped, key)) {
+          if (!Array.isArray(grouped[key])) {
+            grouped[key] = [grouped[key]]
           }
-          object[key].push(typedValue)
+          grouped[key].push(value)
         } else {
-          object[key] = typedValue
+          grouped[key] = value
         }
-      })
+        return grouped;
+      }, {});
+
+      const vals = api.getExpressionVars(elt)
+      const object = Object.fromEntries(
+          Object.entries(groupedParameters).map(([key, value]) => {
+            // FormData encodes values as strings, restore hx-vals/hx-vars with their initial types
+            const typedValue = Object.hasOwn(vals, key) ? vals[key] : value
+            return [key, typedValue]
+          })
+      )
 
       return (JSON.stringify(object))
     }
