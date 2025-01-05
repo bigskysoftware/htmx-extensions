@@ -14,19 +14,22 @@
     encodeParameters: function(xhr, parameters, elt) {
       xhr.overrideMimeType('text/json')
 
-      const vals = api.getExpressionVars(elt)
       const object = {}
       parameters.forEach(function(value, key) {
-        // FormData encodes values as strings, restore hx-vals/hx-vars with their initial types
-        const typedValue = Object.hasOwn(vals, key) ? vals[key] : value
         if (Object.hasOwn(object, key)) {
           if (!Array.isArray(object[key])) {
             object[key] = [object[key]]
           }
-          object[key].push(typedValue)
+          object[key].push(value)
         } else {
-          object[key] = typedValue
+          object[key] = value
         }
+      })
+
+      const vals = api.getExpressionVars(elt)
+      Object.keys(object).forEach(function(key) {
+        // FormData encodes values as strings, restore hx-vals/hx-vars with their initial types
+        object[key] = Object.hasOwn(vals, key) ? vals[key] : object[key]
       })
 
       return (JSON.stringify(object))
