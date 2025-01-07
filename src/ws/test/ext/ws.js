@@ -629,7 +629,7 @@ describe('web-sockets extension', function() {
     this.tickMock()
   })
 
-  it('re-establishes then connection using reconnect()', function() {
+  it('re-establishes closed connections using reconnect()', function() {
     var handledEventTypes = []
     var handler = function(evt) { handledEventTypes.push(evt.detail.event.type) }
     var reconnect = function(evt) { setTimeout(() => evt.detail.socketWrapper.reconnect()) }
