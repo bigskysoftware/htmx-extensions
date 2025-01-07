@@ -289,6 +289,7 @@ This extension adds support for WebSockets to htmx.  See /www/extensions/ws.md f
     wrapper.publicInterface = {
       send: wrapper.send.bind(wrapper),
       sendImmediately: wrapper.sendImmediately.bind(wrapper),
+      reconnect: wrapper.init.bind(wrapper),
       queue: wrapper.messageQueue
     }
 
