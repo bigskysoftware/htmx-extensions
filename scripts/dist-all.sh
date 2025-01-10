@@ -1,6 +1,5 @@
 #!/bin/bash
 # This script must be run from `npm run dist` in order to access `node` and `uglifyjs` commands
-# Make sure you have the permissions to execute the file with `chmod +x scripts/dist-all.sh`
 set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
