@@ -629,6 +629,32 @@ describe('web-sockets extension', function() {
     this.tickMock()
   })
 
+  it('re-establishes closed connections using reconnect()', function() {
+    var handledEventTypes = []
+    var handler = function(evt) { handledEventTypes.push(evt.detail.event.type) }
+    var reconnect = function(evt) { setTimeout(() => evt.detail.socketWrapper.reconnect()) }
+
+    htmx.on('htmx:wsConnecting', handler)
+
+    var div = make('<div hx-get="/test" hx-swap="outerHTML" hx-ext="ws" ws-connect="ws://localhost:8080">')
+
+    htmx.on(div, 'htmx:wsClose', handler)
+    htmx.on(div, 'htmx:wsClose', reconnect)
+
+    this.tickMock()
+    this.socketServer.close()
+
+    this.tickMock()
+    handledEventTypes.should.eql(['connecting', 'close', 'connecting'])
+
+    this.tickMock()
+    this.socketServer.close()
+
+    htmx.off('htmx:wsConnecting', handler)
+    htmx.off(div, 'htmx:wsClose', handler)
+    htmx.off(div, 'htmx:wsClose', reconnect)
+  })
+
   describe('Send immediately', function() {
     function checkCallForWsBeforeSend(spy, wrapper, message, target) {
       // Utility function to always check the same for htmx:wsBeforeSend caught by a spy
