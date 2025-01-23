@@ -1,4 +1,3 @@
-
 This extension supports transforming a JSON/XML request response into HTML via a client-side template before it is
 swapped into the DOM.  Currently four client-side templating engines are supported:
 
@@ -63,7 +62,7 @@ a [`<template>` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/t
   <meta name="viewport" content="width=device-width">
   <meta name="htmx-config" content='{"selfRequestsOnly":false}'>
   <title>JS Bin</title>
-  <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.0/client-side-templates.js"></script>
   <script src="https://unpkg.com/mustache@latest"></script>
 </head>
@@ -96,7 +95,7 @@ Here's a working example using the `mustache-array-template` working against an 
   <meta name="viewport" content="width=device-width">
   <meta name="htmx-config" content='{"selfRequestsOnly":false}'>
   <title>JS Bin</title>
-  <script src="https://unpkg.com/htmx.org"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.0/client-side-templates.js"></script>
   <script src="https://unpkg.com/mustache@latest"></script>
 </head>
@@ -141,8 +140,8 @@ Some styling is needed to keep the object visible while not taking any space.
   <meta name="htmx-config" content='{"selfRequestsOnly":false}'> 
   <title>Weather with htmx</title>
   <link rel="stylesheet" href="https://unpkg.com/mvp.css@1.15.0/mvp.css" />
-  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
-  <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.2/client-side-templates.js"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.0/client-side-templates.js"></script>
 </head>
 
 <body>
@@ -207,7 +206,7 @@ The **Nunjucks** template engine offers a highly versatile option for transformi
   <title>Nunjucks Example</title>
   <!-- Include HTMX, the extension, and Nunjucks -->
   <meta name="htmx-config" content='{"selfRequestsOnly":false}'>
-  <script src="https://unpkg.com/htmx.org"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.0/client-side-templates.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/nunjucks/3.2.4/nunjucks.min.js"></script>
 </head>
