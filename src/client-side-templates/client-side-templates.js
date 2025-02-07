@@ -24,6 +24,24 @@ htmx.defineExtension('client-side-templates', {
       }
     }
 
+    var mustacheHalTemplate = htmx.closest(elt, '[mustache-hal-template]');
+		if (mustacheHalTemplate) {
+			var data = JSON.parse(text);
+			var templateId = mustacheTemplate.getAttribute('mustache-hal-template');
+			var template = htmx.find('#' + templateId);
+			if (template) {
+				var partials = {};
+				document.querySelectorAll('template[id]').forEach(tpl => {
+					partials[tpl.id] = tpl.innerHTML;
+				});
+				var renderedContent = Mustache.render(template.innerHTML, data, partials);
+				renderedContent = renderedContent.replace(/<!--/g, '').replace(/-->/g, ''); // No comments in the Mustache templates !
+				return renderedContent;
+			} else {
+				throw new Error('Unknown mustache template: ' + templateId);
+			}
+		}
+
     var handlebarsTemplate = htmx.closest(elt, '[handlebars-template]')
     if (handlebarsTemplate) {
       var data = JSON.parse(text)
