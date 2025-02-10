@@ -1,4 +1,3 @@
-
 This extension supports transforming a JSON/XML request response into HTML via a client-side template before it is
 swapped into the DOM.  Currently four client-side templating engines are supported:
 
@@ -63,7 +62,7 @@ a [`<template>` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/t
   <meta name="viewport" content="width=device-width">
   <meta name="htmx-config" content='{"selfRequestsOnly":false}'>
   <title>JS Bin</title>
-  <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.0/client-side-templates.js"></script>
   <script src="https://unpkg.com/mustache@latest"></script>
 </head>
@@ -79,7 +78,7 @@ a [`<template>` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/t
     <p id="content">Start</p>
 
     <template id="foo">
-      <p> {{userID}} and {{id}} and {{title}} and {{completed}}</p>
+      <p> {{userId}} and {{id}} and {{title}} and {{completed}}</p>
     </template>
   </div>
 </body>
@@ -96,7 +95,7 @@ Here's a working example using the `mustache-array-template` working against an 
   <meta name="viewport" content="width=device-width">
   <meta name="htmx-config" content='{"selfRequestsOnly":false}'>
   <title>JS Bin</title>
-  <script src="https://unpkg.com/htmx.org"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.0/client-side-templates.js"></script>
   <script src="https://unpkg.com/mustache@latest"></script>
 </head>
@@ -141,8 +140,8 @@ Some styling is needed to keep the object visible while not taking any space.
   <meta name="htmx-config" content='{"selfRequestsOnly":false}'> 
   <title>Weather with htmx</title>
   <link rel="stylesheet" href="https://unpkg.com/mvp.css@1.15.0/mvp.css" />
-  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
-  <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.2/client-side-templates.js"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.0/client-side-templates.js"></script>
 </head>
 
 <body>
@@ -189,6 +188,63 @@ Some styling is needed to keep the object visible while not taking any space.
 ```
 [demo (external link)](https://barakplasma.github.io/htmx-weather/)
 
+
+### Nunjucks Integration
+
+The **Nunjucks** template engine offers a highly versatile option for transforming JSON/XML responses into HTML. Nunjucks provides additional functionality: if the specified template is not found in the document (e.g., via a `<script>` tag), it will send an AJAX request to fetch the template from the server dynamically. How Nunjucks Resolves Templates:
+
+1. **Client-Side Template Resolution**: If a [`<script>` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) or [`<template>` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) with the specified template ID (e.g., `dynamic-template`) exists, Nunjucks will render the data using this template.
+2. **Server-Side Template Resolution**: If the template is not found in the DOM, Nunjucks will automatically make an HTTP request to fetch the template file from the server using the name as the file path. For example, specifying `nunjucks-template="user-template.html"` will prompt Nunjucks to request `/user-template.html` from the server. This capability is particularly useful for creating dynamic, server-generated templates that aren't hardcoded into the page.
+
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Nunjucks Example</title>
+  <!-- Include HTMX, the extension, and Nunjucks -->
+  <meta name="htmx-config" content='{"selfRequestsOnly":false}'>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script src="https://unpkg.com/htmx-ext-client-side-templates@2.0.0/client-side-templates.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nunjucks/3.2.4/nunjucks.min.js"></script>
+</head>
+<body>
+  <div hx-ext="client-side-templates">
+    <h1>Nunjucks Template Example</h1>
+
+    <!-- Button to render using a client-side template -->
+    <button hx-get="https://jsonplaceholder.typicode.com/todos/1"
+            hx-swap="innerHTML"
+            hx-target="#content"
+            nunjucks-template="dynamic-template">
+      Render with Client-Side Template
+    </button>
+
+    <!-- Placeholder for rendering -->
+    <div id="content">Waiting for data...</div>
+
+    <!-- Client-side template defined here -->
+    <script type="text/template" id="dynamic-template">
+      <ul>
+        <li><strong>User ID:</strong> {{ userId }}</li>
+        <li><strong>Title:</strong> {{ title }}</li>
+        <li><strong>Completed:</strong> {{ completed }}</li>
+      </ul>
+    </script>
+
+    <!-- Button to render using a server-side template -->
+    <button hx-get="https://jsonplaceholder.typicode.com/todos/2"
+            hx-swap="innerHTML"
+            hx-target="#content"
+            nunjucks-template="user-template.html">
+      Render with Server-Side Template 
+    </button>
+  </div>
+</body>
+</html>
+```
 
 ## CORS and REST/JSON
 
