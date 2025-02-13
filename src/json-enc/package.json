@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-json-enc",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "main": "dist/json-enc.esm.js",
   "unpkg": "dist/json-enc.min.js",
   "scripts": {

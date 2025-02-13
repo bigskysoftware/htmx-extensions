@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-class-tools",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "main": "dist/class-tools.esm.js",
   "unpkg": "dist/pclass-tools.min.js",
   "scripts": {

@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-event-header",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "dist/event-header.esm.js",
   "unpkg": "dist/event-header.min.js",
   "scripts": {

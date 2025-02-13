@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-response-targets",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "homepage": "https://htmx.org/extensions/response-targets/",
   "main": "dist/response-targets.esm.js",
   "unpkg": "dist/response-targets.min.js",

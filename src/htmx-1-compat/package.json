@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-htmx-1-compat",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "homepage": "https://htmx.org/extensions/htmx-1-compat/",
   "main": "dist/htmx-1-compat.esm.js",
   "unpkg": "dist/htmx-1-compat.min.js",

@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-sse",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "homepage": "https://htmx.org/extensions/sse/",
   "main": "dist/sse.esm.js",
   "unpkg": "dist/sse.min.js",

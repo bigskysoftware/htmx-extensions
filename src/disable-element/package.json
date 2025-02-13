@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-disable-element",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "dist/disable-element.esm.js",
   "unpkg": "dist/disable-element.min.js",
   "scripts": {

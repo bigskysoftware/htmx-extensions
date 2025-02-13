@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-ws",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "homepage": "https://htmx.org/extensions/ws/",
   "main": "dist/ws.esm.js",
   "unpkg": "dist/ws.min.js",

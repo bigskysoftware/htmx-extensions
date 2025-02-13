@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-preload",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "homepage": "https://htmx.org/extensions/preload/",
   "main": "dist/preload.esm.js",
   "unpkg": "dist/preload.min.js",

@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-loading-states",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "dist/loading-states.esm.js",
   "unpkg": "dist/loading-states.min.js",
   "scripts": {

@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-path-params",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "dist/path-params.esm.js",
   "unpkg": "dist/path-params.min.js",
   "scripts": {

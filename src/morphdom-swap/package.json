@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-morphdom-swap",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "dist/morphdom-swap.esm.js",
   "unpkg": "dist/morphdom-swap.min.js",
   "scripts": {

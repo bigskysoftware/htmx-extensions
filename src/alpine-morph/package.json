@@ -1,6 +1,6 @@
 {
   "name": "htmx-ext-alpine-morph",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "dist/alpine-morph.esm.js",
   "unpkg": "dist/alpine-morph.min.js",
   "scripts": {
