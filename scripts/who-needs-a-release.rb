@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 require 'json'
 
+`npm install`
+`npm run dist`
+
 Dir.chdir('src')
 
 Dir.foreach('.') do |filename|

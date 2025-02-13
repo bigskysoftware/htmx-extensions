@@ -12,5 +12,5 @@ Corresponding issue:
 
 ## Checklist
 
-* [ ] I have read the [contribution guidelines](/CONTRIBUTING.md)
+* [ ] I have read the [contribution guidelines](https://github.com/bigskysoftware/htmx-extensions/blob/main/CONTRIBUTING.md)
 * [ ] I ran the test suite locally (`npm run test`) and verified that it succeeded
