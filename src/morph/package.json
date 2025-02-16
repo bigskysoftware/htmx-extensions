@@ -1,0 +1,26 @@
+{
+  "name": "htmx-ext-morph",
+  "version": "2.0.0",
+  "main": "dist/morph.esm.js",
+  "unpkg": "dist/morph.min.js",
+  "jsdelivr": "dist/morph.min.js",
+  "scripts": {
+    "test": "mocha-chrome test/index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bigskysoftware/htmx-extensions.git"
+  },
+  "dependencies": {
+    "htmx.org": "^2.0.2"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "chai-dom": "^1.12.0",
+    "idiomorph": "^0.7.4",
+    "mocha": "10.1.0",
+    "mocha-chrome": "https://github.com/Telroshan/mocha-chrome",
+    "sinon": "^9.2.4"
+  },
+  "license": "0BSD"
+}

@@ -8,7 +8,7 @@ As we were adding more extensions, this also meant more support to provide, with
 As we worked on htmx 2, we decided to move the extensions to a separate repository, to clearly split apart the core library from its extensions and simplify their maintenance.\
 We decided to keep the already existing extensions in, that we will keep providing support for.\
 As we are a small team, we hope you'll understand that we can't do that with all extensions!\
-This is why, you will find most core extensions sources in this repository (except [idiomorph](https://github.com/bigskysoftware/idiomorph) which has its own), and *some* of the community extensions along. That's htmx 1's legacy!
+This is why, you will find most core extensions sources in this repository, and *some* of the community extensions along. That's htmx 1's legacy!
 
 ## Have a cool extension to suggest?
 Feel free to create any extension to fit your project and needs! This system was designed with this goal in mind.\
