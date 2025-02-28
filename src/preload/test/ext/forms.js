@@ -244,5 +244,21 @@ describe('preload extension preloads forms', function() {
 
       should.equal(requests.length, 1)
     })
+
+    it('skips label initialisation for fieldsets (issue 149)', function() {
+      const form = make(`
+        <form action="/test" method="get" preload>
+	  <fieldset>
+            <input type="text" name="name" value="John">
+	  </fieldset>
+          <input type="submit" value="Submit">
+        </form>
+      `)
+      const submitButton = form.querySelector("input[type='submit']")
+
+      htmx.trigger(submitButton, 'mousedown')
+
+      should.equal(requests.length, 1)
+      should.equal(requests[0].url, '/test?name=John')
+    })
   })
-  
