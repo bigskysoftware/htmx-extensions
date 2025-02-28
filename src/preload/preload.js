@@ -90,7 +90,9 @@
       for (let i = 0; i < form.elements.length; i++) {
         const element = form.elements.item(i);
         init(element);
-        element.labels.forEach(init);
+        if ("labels" in element) {
+          element.labels.forEach(init);
+        }
       }
       return
     }
