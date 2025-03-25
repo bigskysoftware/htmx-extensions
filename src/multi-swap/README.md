@@ -1,7 +1,7 @@
 
 This extension allows you to swap multiple elements marked with the `id` attribute from the HTML response. You can also choose for each element which [swap method](https://htmx.org/docs#swapping) should be used. Multi-swap is a very powerful tool in conjunction with `hx-boost` and `preload` extension.
 
-It should be noted that using OOB swaps ([Out of Band Swaps](https://htmx.org/docs#oob_swaps)) should be enough for most use cases, since OOB swaps by now can handle nested elements anywhere in the DOM and with a specified swap method. Thus it's recommended to be familiar with OOB swaps to make an informed decision on whether this extension is required anymore.
+It should be noted that using OOB swaps ([Out of Band Swaps](https://htmx.org/docs#oob_swaps)) should be enough for most use cases and a similar approach using the core htmx attributes is [`hx-select-oob`](https://htmx.org/attributes/hx-select-oob/) along with `hx-swap="none"`. Thus it's recommended to be familiar with OOB swaps to make an informed decision on whether this extension is required anymore.
 
 
 ## Install
