@@ -107,12 +107,12 @@
 
     // Set up event handlers listening for triggering events
     const needsTimeout = triggerEventName === 'mouseover'
-    node.addEventListener(triggerEventName, getEventHandler(node, needsTimeout))
+    node.addEventListener(triggerEventName, getEventHandler(node, needsTimeout), {passive: true})
 
     // Add `touchstart` listener for touchscreen support
     // if `mousedown` or `mouseover` is used
     if (triggerEventName === 'mousedown' || triggerEventName === 'mouseover') {
-      node.addEventListener('touchstart', getEventHandler(node))
+      node.addEventListener('touchstart', getEventHandler(node), {passive: true})
     }
 
     // If `mouseover` is used, set up `mouseout` listener,
@@ -123,7 +123,7 @@
         if ((evt.target === node) && (node.preloadState === 'TIMEOUT')) {
           node.preloadState = 'READY'
         }
-      })
+      }, {passive: true})
     }
 
     // Mark the node as ready to be preloaded
