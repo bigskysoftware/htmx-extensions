@@ -25,7 +25,9 @@ describe('web-sockets extension', function() {
       close: function() {
         if (this._open) {
           this._open = false
-          this._fireEvent('close', { type: 'close', code: 0 })
+          setTimeout(function () {
+            this._fireEvent('close', { type: 'close', code: 1006 })
+          }.bind(this), 2)
         }
       },
       _listeners: {},
@@ -130,7 +132,7 @@ describe('web-sockets extension', function() {
     div.click()
     this.server.respond()
 
-    this.tickMock()
+    this.clock.tick(7000) // give socket opportunity to erroneously reconnect
 
     this.socketServer.clients().length.should.equal(0)
   })
