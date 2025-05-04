@@ -356,6 +356,11 @@ This extension adds support for WebSockets to htmx.  See /www/extensions/ws.md f
           socketWrapper: socketWrapper.publicInterface
         }
 
+        // Add triggering event to headers so authors can
+        // differentiate what caused the trigger when listening for
+        // multiple events (e.g., a swipe-left versus a swipe-right).
+        headers['HX-Trigger-Event'] = sendConfig.triggeringEvent.type
+
         if (!api.triggerEvent(elt, 'htmx:wsConfigSend', sendConfig)) {
           return
         }
