@@ -25,6 +25,17 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       if (htmx.createEventSource == undefined) {
         htmx.createEventSource = createEventSource
       }
+
+      // close SSE connections when page is about to unload
+      // cf. https://github.com/bigskysoftware/htmx/discussions/2109
+      window.addEventListener('beforeunload', function() {
+        document.querySelectorAll('[sse-connect], [hx-sse]').forEach(function(elt) {
+          var internalData = api.getInternalData(elt);
+          if (internalData && internalData.sseEventSource) {
+              internalData.sseEventSource.close();
+          }
+        });
+      });
     },
 
     getSelectors: function() {
