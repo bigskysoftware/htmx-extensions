@@ -253,7 +253,7 @@ This extension adds support for WebSockets to htmx.  See /www/extensions/ws.md f
         socket.onclose = function(e) {
           // If socket should not be connected, stop further attempts to establish connection
           // If Abnormal Closure/Service Restart/Try Again Later, then set a timer to reconnect after a pause.
-          if (!maybeCloseWebSocketSource(socketElt) && [1006, 1012, 1013].indexOf(e.code) >= 0) {
+          if (!maybeCloseWebSocketSource(socketElt) && [1006, 1011, 1012, 1013].indexOf(e.code) >= 0) {
             var delay = getWebSocketReconnectDelay(wrapper.retryCount)
             setTimeout(function() {
               wrapper.retryCount += 1
