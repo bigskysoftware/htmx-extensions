@@ -233,6 +233,40 @@ describe('web-sockets extension', function() {
     byId('d2').innerHTML.should.equal('div2')
   })
 
+
+  it('handles message from the server with template wrapping', function() {
+    var div = make('<div hx-ext="ws" ws-connect="ws://localhost:8080"><div id="d1">div1</div><div id="d2">div2</div><table><tr id="r3"><td>table</td></tr></Table></div>')
+    this.tickMock()
+
+    this.socketServer.emit('message', '<div id="d1">replaced</div><template><tr id="r3"><td>replaced</td></tr></template>')
+
+    this.tickMock()
+    byId('d1').innerHTML.should.equal('replaced')
+    byId('d2').innerHTML.should.equal('div2')
+    byId('r3').innerHTML.should.equal('<td>replaced</td>')
+  })
+
+  it('handles replacing template with id', function() {
+    var div = make('<div hx-ext="ws" ws-connect="ws://localhost:8080"><template id="t1">Template</template></div>')
+    this.tickMock()
+
+    this.socketServer.emit('message', '<template id="t1">replaced</template>')
+
+    this.tickMock()
+    byId('t1').innerHTML.should.equal('replaced')
+  })
+
+  it('handles replacing template with hx-swap-oob attribute', function() {
+    var div = make('<div hx-ext="ws" ws-connect="ws://localhost:8080"><template id="t1">Template</template></div>')
+    this.tickMock()
+
+    this.socketServer.emit('message', '<template hx-swap-oob="outerHTML:#t1">replaced</template>')
+
+    this.tickMock()
+
+    div.firstChild.innerHTML.should.equal('replaced')
+  })
+
   it('raises lifecycle events (connecting, open, close) in correct order', function() {
     var handledEventTypes = []
     var handler = function(evt) { handledEventTypes.push(evt.detail.event.type) }

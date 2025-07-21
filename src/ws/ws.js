@@ -79,6 +79,23 @@ This extension adds support for WebSockets to htmx.  See /www/extensions/ws.md f
   }
 
   /**
+   * perform oobSwap on all fragment children and process children wrapped in empty template tags
+   * @param {HTMLCollection} children
+   * @param {Object} settleInfo
+   * @returns
+   */
+  function oobSwapChildren(children, settleInfo) {
+    for (const child of Array.from(children)) {
+      const hxSwapOob = api.getAttributeValue(child, 'hx-swap-oob')
+      if(child.tagName !== 'TEMPLATE' || hxSwapOob || child.id) {
+        api.oobSwap(hxSwapOob || 'true', child, settleInfo)
+      } else {
+        oobSwapChildren(child.content.children, settleInfo)
+      }
+    }
+  }
+
+  /**
    * ensureWebSocket creates a new WebSocket on the designated element, using
    * the element's "ws-connect" attribute.
    * @param {HTMLElement} socketElt
@@ -137,12 +154,7 @@ This extension adds support for WebSockets to htmx.  See /www/extensions/ws.md f
       var settleInfo = api.makeSettleInfo(socketElt)
       var fragment = api.makeFragment(response)
 
-      if (fragment.children.length) {
-        var children = Array.from(fragment.children)
-        for (var i = 0; i < children.length; i++) {
-          api.oobSwap(api.getAttributeValue(children[i], 'hx-swap-oob') || 'true', children[i], settleInfo)
-        }
-      }
+      oobSwapChildren(fragment.children, settleInfo)
 
       api.settleImmediately(settleInfo.tasks)
       api.triggerEvent(socketElt, 'htmx:wsAfterMessage', { message: response, socketWrapper: socketWrapper.publicInterface })
