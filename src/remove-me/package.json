@@ -15,7 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/bigskysoftware/htmx-extensions.git"
   },
-  "dependencies": {
+  "peerDependencies": {
     "htmx.org": "^2.0.2"
   },
   "devDependencies": {
