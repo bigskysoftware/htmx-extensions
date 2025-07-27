@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>head-support ReDoS Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="https://unpkg.com/mocha/mocha.js"></script>
+    <script src="https://unpkg.com/chai@4.3.4/chai.js"></script>
+    <script>
+      mocha.setup("bdd");
+      const expect = chai.expect;
+    </script>
+
+    <script>
+      describe("[SECURITY][ReDoS] regex tests for head-support extension", function () {
+        it("should not hang on crafted <head> input", function (done) {
+          this.timeout(1000);
+          const attackString = "<head>".repeat(100000) + "\u0000";
+          const regex = /^<head(\s[^>]*>|>)([\s\S]*?)<\/head>/im;
+
+          const start = performance.now();
+          const result = attackString.match(regex);
+          const duration = performance.now() - start;
+
+          expect(duration).to.be.below(800);
+          done();
+        });
+
+        it("should not hang on crafted <svg> input", function (done) {
+          this.timeout(1000);
+          const attackString = "<svg ".repeat(100000) + ">";
+          const regex = /<svg(\s(?:(?!<svg\s)[^>])*>|>)(?:(?!<svg\s?)[\s\S])*?<\/svg>/gim;
+
+          const start = performance.now();
+          const result = attackString.match(regex);
+          const duration = performance.now() - start;
+
+          expect(duration).to.be.below(800);
+          done();
+        });
+      });
+
+      mocha.run();
+    </script>
+  </body>
+</html>
