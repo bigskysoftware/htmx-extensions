@@ -702,4 +702,14 @@ describe('sse extension', function() {
     byId('d1').innerHTML.should.equal('div1 updated')
     byId('d2').innerHTML.should.equal('div2 updated')
   })
+
+  it('swaps content properly on SSE swap with hx-select', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/event_stream">' +
+                   '  <div id="d1" sse-swap="e1" hx-select="#s1"></div>' +
+                   '</div>')
+    this.clock.tick(1)
+    byId('d1').innerText.should.equal('')
+    this.eventSource.sendEvent('e1', '<div><div id="s1">Event 1</div></div>')
+    byId('d1').innerText.should.equal('Event 1')
+  })
 })
