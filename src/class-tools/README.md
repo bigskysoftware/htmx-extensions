@@ -15,6 +15,10 @@ Within a run, a `,` character separates distinct class operations.
 A class operation is an operation name `add`, `remove`, or `toggle`, followed by a CSS class name,
 optionally followed by a colon `:` and a time delay.
 
+## On event trigger class manipulation
+This feature allows for dynamic class manipulation in response to specific events using the `classes-event-trigger` or `data-classes-event-trigger` attribute.
+
+
 ## Out-of-band class manipulation
 
 There is also the option to use `apply-parent-classes`, or `data-apply-parent-classes`, which take the same format as `classes`
@@ -42,6 +46,14 @@ so it should ideally be used as part of an `hx-swap-oob="beforeend: #some-elemen
     <div class="bar" classes="remove bar:1s & add foo:1s"/> <!-- removes the class "bar" and adds
                                                                  class "foo" after 1s  -->
     <div classes="toggle foo:1s"/> <!-- toggles the class "foo" every 1s -->
+</div>
+
+<!-- The following performs class manipulation only after the event is triggered -->
+<div hx-ext="class-tools">
+    <div classes="add foo:1s" classes-event-trigger="my-custom-event">Class foo wil be added after 1s</div> <!-- Adds the class "foo" 1 second after the event is triggered -->
+    <div classes="toggle foo:!" classes-event-trigger="my-custom-event">Class foo wil be toggled</div> <!-- "!" means toggle immediately with no delay -->
+    <div classes="toggle foo:!, toggle bar:!" classes-event-trigger="my-custom-event">Class foo & bar wil be toggled</div> <!-- toggles multiple classes -->
+    <button hx-on-click="htmx.trigger('body', 'my-custom-event')">toggle</button>
 </div>
 
 <!-- The following OOB update surgically applies CSS classes to "my-element" -->

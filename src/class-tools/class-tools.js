@@ -13,7 +13,7 @@
       if (classDef.indexOf(':') > 0) {
         var splitCssClass = classDef.split(':')
         cssClass = splitCssClass[0]
-        delay = htmx.parseInterval(splitCssClass[1])
+        delay = splitCssClass[1] === '!' ? null : htmx.parseInterval(splitCssClass[1])
       } else {
         cssClass = classDef
         delay = 100
@@ -28,16 +28,20 @@
     }
   }
 
-  function performOperation(elt, classOperation, classList, currentRunTime) {
+  function call(elt, classOperation) {
+    elt.classList[classOperation.operation].call(elt.classList, classOperation.cssClass)
+  }
+  
+  function performOperation(elt, classOperation, currentRunTime) {
     setTimeout(function() {
-      elt.classList[classOperation.operation].call(elt.classList, classOperation.cssClass)
+      call(elt, classOperation)
     }, currentRunTime)
   }
 
-  function toggleOperation(elt, classOperation, classList, currentRunTime) {
+  function toggleOperation(elt, classOperation, currentRunTime) {
     setTimeout(function() {
       setInterval(function() {
-        elt.classList[classOperation.operation].call(elt.classList, classOperation.cssClass)
+        call(elt, classOperation)
       }, classOperation.delay)
     }, currentRunTime)
   }
@@ -54,11 +58,15 @@
         var classOperation = parseClassOperation(trimmedValue)
         if (classOperation) {
           if (classOperation.operation === 'toggle') {
-            toggleOperation(elt, classOperation, classList, currentRunTime)
-            currentRunTime = currentRunTime + classOperation.delay
+            if (classOperation.delay) {
+              toggleOperation(elt, classOperation, currentRunTime)
+              currentRunTime += classOperation.delay
+            } else {
+              call(elt, classOperation)
+            }
           } else {
-            currentRunTime = currentRunTime + classOperation.delay
-            performOperation(elt, classOperation, classList, currentRunTime)
+            currentRunTime += classOperation.delay
+            performOperation(elt, classOperation, currentRunTime)
           }
         }
       }
@@ -68,7 +76,15 @@
   function maybeProcessClasses(elt) {
     if (elt.getAttribute) {
       var classList = elt.getAttribute('classes') || elt.getAttribute('data-classes')
-      if (classList) {
+      var eventTrigger = elt.getAttribute('classes-event-trigger') || elt.getAttribute('data-classes-event-trigger')
+      if (eventTrigger) {
+        var handleEvent = function() {
+          processClassList(elt, classList)
+          elt.removeEventListener(eventTrigger, handleEvent)
+        }
+        elt.addEventListener(eventTrigger, handleEvent, { once: true })
+        document.addEventListener(eventTrigger, handleEvent)
+      } else if (classList) {
         processClassList(elt, classList)
       }
     }
@@ -79,14 +95,14 @@
       if (name === 'htmx:afterProcessNode') {
         var elt = evt.detail.elt
         maybeProcessClasses(elt)
-        var classList = elt.getAttribute("apply-parent-classes") || elt.getAttribute("data-apply-parent-classes");
+        var classList = elt.getAttribute('apply-parent-classes') || elt.getAttribute('data-apply-parent-classes')
         if (classList) {
-          var parent = elt.parentElement;
-          parent.removeChild(elt);
-          parent.setAttribute("classes", classList);
-          maybeProcessClasses(parent);
+          var parent = elt.parentElement
+          parent.removeChild(elt)
+          parent.setAttribute('classes', classList)
+          maybeProcessClasses(parent)
         } else if (elt.querySelectorAll) {
-          var children = elt.querySelectorAll('[classes], [data-classes]')
+          var children = elt.querySelectorAll('[classes], [data-classes], [classes-event-trigger], [data-classes-event-trigger]')
           for (var i = 0; i < children.length; i++) {
             maybeProcessClasses(children[i])
           }
