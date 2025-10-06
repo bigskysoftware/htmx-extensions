@@ -85,20 +85,31 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
    * @param {HTMLElement} elt
    */
   function registerSSE(elt) {
-    // Add message handlers for every `sse-swap` attribute
-    if (api.getAttributeValue(elt, 'sse-swap')) {
+  var sseSwapAttr = api.getAttributeValue(elt, 'sse-swap');
+  var sseConnectAttr = api.getAttributeValue(elt, 'sse-connect');
+
+  var hasSseSwap = sseSwapAttr !== null;
+  var hasSseConnect = sseConnectAttr !== null;
+  var hasNestedSseSwap = elt.querySelector('[sse-swap], [data-sse-swap]') !== null;
+
+  if (hasSseConnect && !(hasSseSwap || hasNestedSseSwap)) {
+      // Default `sse-swap` to `message`
+      sseSwapAttr = 'message';
+  }
+
+  // Add message handlers for every `sse-swap` attribute
+  if (sseSwapAttr) {
       // Find closest existing event source
       var sourceElement = api.getClosestMatch(elt, hasEventSource)
       if (sourceElement == null) {
-        // api.triggerErrorEvent(elt, "htmx:noSSESourceError")
-        return null // no eventsource in parentage, orphaned element
+      // api.triggerErrorEvent(elt, "htmx:noSSESourceError")
+      return null // no eventsource in parentage, orphaned element
       }
 
       // Set internalData and source
       var internalData = api.getInternalData(sourceElement)
       var source = internalData.sseEventSource
 
-      var sseSwapAttr = api.getAttributeValue(elt, 'sse-swap')
       var sseEventNames = sseSwapAttr.split(',')
 
       for (var i = 0; i < sseEventNames.length; i++) {

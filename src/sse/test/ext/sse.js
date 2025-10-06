@@ -702,4 +702,45 @@ describe('sse extension', function() {
     byId('d1').innerHTML.should.equal('div1 updated')
     byId('d2').innerHTML.should.equal('div2 updated')
   })
+
+  it('defaults to message event if sse-swap is not specified', function() {
+    var div = make('<div id="d1" hx-ext="sse" sse-connect="/event_stream"></div>');
+    this.clock.tick(1);
+    byId('d1').innerText.should.equal('');
+    this.eventSource.sendEvent('message', 'Event 1');
+    byId('d1').innerText.should.equal('Event 1');
+  });
+
+  it('does not default to message when parent has nested sse-swap elements', function() {
+    var div = make('<div id="parent" hx-ext="sse" sse-connect="/events">\n' +
+            '  <div id="foo" sse-swap="foo"></div>\n' +
+            '  <div id="bar" sse-swap="bar"></div>\n' +
+            '</div>');
+    this.clock.tick(1);
+
+    // Parent should NOT have default message event listener when it has nested sse-swap children
+    (this.eventSource._listeners.message == undefined).should.be.true;
+
+    // Child elements should have their specific event listeners
+    this.eventSource._listeners.foo.should.be.lengthOf(1);
+    this.eventSource._listeners.bar.should.be.lengthOf(1);
+
+    // Test that each element responds to its specific event
+    byId('foo').innerText.should.equal('');
+    byId('bar').innerText.should.equal('');
+
+    this.eventSource.sendEvent('foo', 'Foo Event');
+    byId('foo').innerText.should.equal('Foo Event');
+    byId('bar').innerText.should.equal('');
+
+    this.eventSource.sendEvent('bar', 'Bar Event');
+    byId('foo').innerText.should.equal('Foo Event');
+    byId('bar').innerText.should.equal('Bar Event');
+
+    // Message events should not affect anything since parent doesn't listen for them
+    this.eventSource.sendEvent('message', 'Default Message');
+    byId('foo').innerText.should.equal('Foo Event');
+    byId('bar').innerText.should.equal('Bar Event');
+    byId('parent').innerText.should.not.contain('Default Message');
+  });
 })
