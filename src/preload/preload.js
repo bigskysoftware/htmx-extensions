@@ -36,8 +36,21 @@
       // such as showing loading indicators while preloading data. 
       if (name === 'htmx:beforeRequest') {
         const requestHeaders = event.detail.requestConfig.headers
-        if (!("HX-Preloaded" in requestHeaders
-              && requestHeaders["HX-Preloaded"] === "true")) {
+        const elt = event.detail.elt
+        const isPreload = ("HX-Preloaded" in requestHeaders
+              && requestHeaders["HX-Preloaded"] === "true")
+
+        // If a normal HTMX request fires while a preload for the same element
+        // is still in-flight, suppress it and re-trigger after preload finishes.
+        if (!isPreload) {
+          if (elt && elt.preloadState === 'LOADING') {
+            event.preventDefault()
+            const reClick = function() {
+              elt.removeEventListener('preload:done', reClick)
+              if (elt instanceof HTMLElement) { elt.click() }
+            }
+            elt.addEventListener('preload:done', reClick, { once: true })
+          }
           return
         }
 
@@ -46,6 +59,8 @@
         const xhr = event.detail.xhr
         xhr.onload = function() {
           processResponse(event.detail.elt, xhr.responseText)
+          // notify listeners the preload finished
+          htmx.trigger(event.detail.elt, 'preload:done')
         }
         xhr.onerror = null
         xhr.onabort = null
@@ -90,9 +105,7 @@
       for (let i = 0; i < form.elements.length; i++) {
         const element = form.elements.item(i);
         init(element);
-        if ("labels" in element) {
-          element.labels.forEach(init);
-        }
+        element.labels.forEach(init);
       }
       return
     }
@@ -107,12 +120,12 @@
 
     // Set up event handlers listening for triggering events
     const needsTimeout = triggerEventName === 'mouseover'
-    node.addEventListener(triggerEventName, getEventHandler(node, needsTimeout), {passive: true})
+    node.addEventListener(triggerEventName, getEventHandler(node, needsTimeout))
 
     // Add `touchstart` listener for touchscreen support
     // if `mousedown` or `mouseover` is used
     if (triggerEventName === 'mousedown' || triggerEventName === 'mouseover') {
-      node.addEventListener('touchstart', getEventHandler(node), {passive: true})
+      node.addEventListener('touchstart', getEventHandler(node))
     }
 
     // If `mouseover` is used, set up `mouseout` listener,
@@ -123,7 +136,7 @@
         if ((evt.target === node) && (node.preloadState === 'TIMEOUT')) {
           node.preloadState = 'READY'
         }
-      }, {passive: true})
+      })
     }
 
     // Mark the node as ready to be preloaded
@@ -307,7 +320,10 @@
     }
     xhr.open('GET', url);
     xhr.setRequestHeader("HX-Preloaded", "true")
-    xhr.onload = function() { processResponse(sourceNode, xhr.responseText) }
+    xhr.onload = function() {
+      processResponse(sourceNode, xhr.responseText)
+      htmx.trigger(sourceNode, 'preload:done')
+    }
     xhr.send()
   }
 
