@@ -164,4 +164,24 @@ describe('loading states extension', function() {
     var el = byId('d2')
     el.disabled.should.be.false
   })
+
+  it('loading state should not trigger for preloaded request', function() {
+    this.server.respondWith('GET', '/test', 'Loaded!')
+    var container = make('<div hx-ext="loading-states,preload"><button hx-get="/test" preload="mouseover">Hover Me!</button><div data-loading style="display: none;">Loading...</div></div>')
+    var btn = container.querySelector('button')
+    var loader = container.querySelector('[data-loading]')
+    
+    loader.style.display.should.equal('none')
+    
+    htmx.trigger(btn, 'mouseover')
+    this.clock.tick(100)
+    
+    loader.style.display.should.equal('none')
+    
+    this.server.respond()
+    
+    loader.style.display.should.equal('none')
+  })
 })
+
+

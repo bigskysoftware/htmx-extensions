@@ -61,7 +61,8 @@
 
   htmx.defineExtension('loading-states', {
     onEvent: function(name, evt) {
-      if (name === 'htmx:beforeRequest') {
+      if (name === 'htmx:beforeRequest'
+          && evt.detail.requestConfig.headers["HX-Preloaded"] !== "true") {
         const container = loadingStateContainer(evt.target)
 
         const loadingStateTypes = [
