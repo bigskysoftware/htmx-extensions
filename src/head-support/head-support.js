@@ -91,8 +91,8 @@
                     var newElt = document.createRange().createContextualFragment(newNode.outerHTML);
                     log(newElt);
                     if (api.triggerEvent(document.body, "htmx:addingHeadElement", {headElement: newElt}) !== false) {
+                        added.push(newElt.firstElementChild);
                         currentHead.appendChild(newElt);
-                        added.push(newElt);
                     }
                 }
 
