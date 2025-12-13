@@ -81,7 +81,7 @@
                     }
                 }
 
-                // Push the tremaining new head elements in the Map into the
+                // Push the remaining new head elements in the Map into the
                 // nodes to append to the head tag
                 nodesToAppend.push(...srcToNewHeadNodes.values());
                 log("to append: ", nodesToAppend);
@@ -91,8 +91,8 @@
                     var newElt = document.createRange().createContextualFragment(newNode.outerHTML);
                     log(newElt);
                     if (api.triggerEvent(document.body, "htmx:addingHeadElement", {headElement: newElt}) !== false) {
+                        added.push(newElt.firstElementChild);
                         currentHead.appendChild(newElt);
-                        added.push(newElt);
                     }
                 }
 
