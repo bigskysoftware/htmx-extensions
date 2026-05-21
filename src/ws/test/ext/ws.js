@@ -99,7 +99,9 @@ describe('web-sockets extension', function() {
 
     clearWorkArea()
     this.oldCreateWebSocket = htmx.createWebSocket
-    htmx.createWebSocket = function() {
+    var test = this
+    htmx.createWebSocket = function(url) {
+      test.lastWebSocketUrl = url
       mockedSocket.client.connect()
       return mockedSocket.client
     }
@@ -847,6 +849,80 @@ describe('web-sockets extension', function() {
         this.tickMock()
       } finally {
         window.document.removeEventListener('htmx:wsOpen', handler)
+      }
+    })
+  })
+
+  describe('connection configuration', function() {
+    it('appends hx-vals to the ws-connect URL as query parameters', function() {
+      make('<div hx-ext="ws" ws-connect="ws://localhost:8080/chat" hx-vals=\'{"room":"main","token":"abc"}\'></div>')
+      this.tickMock()
+
+      this.lastWebSocketUrl.should.contain('ws://localhost:8080/chat?')
+      this.lastWebSocketUrl.should.contain('room=main')
+      this.lastWebSocketUrl.should.contain('token=abc')
+    })
+
+    it('preserves an existing query string when appending hx-vals to ws-connect', function() {
+      make('<div hx-ext="ws" ws-connect="ws://localhost:8080/chat?v=1" hx-vals=\'{"room":"main"}\'></div>')
+      this.tickMock()
+
+      this.lastWebSocketUrl.should.equal('ws://localhost:8080/chat?v=1&room=main')
+    })
+
+    it('does not modify the ws-connect URL when no hx-vals are provided', function() {
+      make('<div hx-ext="ws" ws-connect="ws://localhost:8080/chat"></div>')
+      this.tickMock()
+
+      this.lastWebSocketUrl.should.equal('ws://localhost:8080/chat')
+    })
+
+    it('fires htmx:wsConfigConnect before opening the WebSocket', function() {
+      var configEvent = null
+      var handler = function(evt) {
+        configEvent = evt.detail
+      }
+      htmx.on('htmx:wsConfigConnect', handler)
+      try {
+        make('<div hx-ext="ws" ws-connect="ws://localhost:8080/chat"></div>')
+        this.tickMock()
+
+        configEvent.should.exist
+        configEvent.url.should.equal('ws://localhost:8080/chat')
+        configEvent.parameters.should.be.an('object')
+        configEvent.elt.should.exist
+      } finally {
+        htmx.off('htmx:wsConfigConnect', handler)
+      }
+    })
+
+    it('allows htmx:wsConfigConnect to override the connection URL', function() {
+      var handler = function(evt) {
+        evt.detail.url = 'ws://localhost:8080/overridden?token=abc'
+      }
+      htmx.on('htmx:wsConfigConnect', handler)
+      try {
+        make('<div hx-ext="ws" ws-connect="ws://localhost:8080/chat"></div>')
+        this.tickMock()
+
+        this.lastWebSocketUrl.should.equal('ws://localhost:8080/overridden?token=abc')
+      } finally {
+        htmx.off('htmx:wsConfigConnect', handler)
+      }
+    })
+
+    it('aborts the connection when htmx:wsConfigConnect is cancelled', function() {
+      this.lastWebSocketUrl = null
+      var handler = function(evt) {
+        evt.preventDefault()
+      }
+      htmx.on('htmx:wsConfigConnect', handler)
+      try {
+        make('<div hx-ext="ws" ws-connect="ws://localhost:8080/chat"></div>')
+        this.tickMock()
+        should.not.exist(this.lastWebSocketUrl)
+      } finally {
+        htmx.off('htmx:wsConfigConnect', handler)
       }
     })
   })

@@ -66,9 +66,10 @@ describe('sse extension', function() {
     this.clock = sinon.useFakeTimers();
     var test = this
     clearWorkArea()
-    htmx.createEventSource = function(url) {
+    htmx.createEventSource = function(url, options) {
       var eventSource = mockEventSource()
       test.eventSource = eventSource
+      eventSource.options = options
       eventSource.connect(url)
       return eventSource
     }
@@ -701,5 +702,128 @@ describe('sse extension', function() {
     this.server.respond()
     byId('d1').innerHTML.should.equal('div1 updated')
     byId('d2').innerHTML.should.equal('div2 updated')
+  })
+
+  it('passes a default options object containing withCredentials to createEventSource', function() {
+    make('<div hx-ext="sse" sse-connect="/foo"></div>')
+    this.clock.tick(1)
+
+    this.eventSource.url.should.equal('/foo')
+    this.eventSource.options.should.be.an('object')
+    this.eventSource.options.withCredentials.should.equal(true)
+  })
+
+  it('appends hx-vals to the sse-connect URL as query parameters', function() {
+    make('<div hx-ext="sse" sse-connect="/foo" hx-vals=\'{"a":"1","b":"hello world"}\'></div>')
+    this.clock.tick(1)
+
+    // URL contains the appended hx-vals, with proper encoding of spaces
+    this.eventSource.url.should.contain('/foo?')
+    this.eventSource.url.should.contain('a=1')
+    this.eventSource.url.should.contain('b=hello%20world')
+  })
+
+  it('preserves an existing query string when appending hx-vals to sse-connect', function() {
+    make('<div hx-ext="sse" sse-connect="/foo?x=1" hx-vals=\'{"a":"2"}\'></div>')
+    this.clock.tick(1)
+
+    this.eventSource.url.should.equal('/foo?x=1&a=2')
+  })
+
+  it('does not modify the URL when no hx-vals are provided', function() {
+    make('<div hx-ext="sse" sse-connect="/foo"></div>')
+    this.clock.tick(1)
+
+    this.eventSource.url.should.equal('/foo')
+  })
+
+  it('fires htmx:sseConfigConnect before opening the EventSource', function() {
+    var configEvent = null
+    var handler = function(evt) {
+      configEvent = evt.detail
+    }
+    htmx.on('htmx:sseConfigConnect', handler)
+    try {
+      make('<div hx-ext="sse" sse-connect="/foo"></div>')
+      this.clock.tick(1)
+
+      configEvent.should.exist
+      configEvent.url.should.equal('/foo')
+      configEvent.options.should.be.an('object')
+      configEvent.options.withCredentials.should.equal(true)
+      configEvent.parameters.should.be.an('object')
+      configEvent.headers.should.be.an('object')
+      configEvent.elt.should.exist
+    } finally {
+      htmx.off('htmx:sseConfigConnect', handler)
+    }
+  })
+
+  it('allows htmx:sseConfigConnect to override the connection URL', function() {
+    var handler = function(evt) {
+      evt.detail.url = '/overridden?token=abc'
+    }
+    htmx.on('htmx:sseConfigConnect', handler)
+    try {
+      make('<div hx-ext="sse" sse-connect="/foo"></div>')
+      this.clock.tick(1)
+
+      this.eventSource.url.should.equal('/overridden?token=abc')
+    } finally {
+      htmx.off('htmx:sseConfigConnect', handler)
+    }
+  })
+
+  it('allows htmx:sseConfigConnect to override the options object (e.g. for an sse.js polyfill)', function() {
+    var handler = function(evt) {
+      evt.detail.options.method = 'POST'
+      evt.detail.options.headers = { Authorization: 'Bearer token' }
+      evt.detail.options.payload = JSON.stringify({ hello: 'world' })
+    }
+    htmx.on('htmx:sseConfigConnect', handler)
+    try {
+      make('<div hx-ext="sse" sse-connect="/foo"></div>')
+      this.clock.tick(1)
+
+      this.eventSource.options.method.should.equal('POST')
+      this.eventSource.options.headers.Authorization.should.equal('Bearer token')
+      this.eventSource.options.payload.should.equal('{"hello":"world"}')
+    } finally {
+      htmx.off('htmx:sseConfigConnect', handler)
+    }
+  })
+
+  it('aborts the connection when htmx:sseConfigConnect is cancelled', function() {
+    var test = this
+    test.eventSource = null
+    var handler = function(evt) {
+      evt.preventDefault()
+    }
+    htmx.on('htmx:sseConfigConnect', handler)
+    try {
+      make('<div hx-ext="sse" sse-connect="/foo"></div>')
+      this.clock.tick(1)
+      // The handler cancelled the event, so createEventSource should not have been called
+      should.not.exist(test.eventSource)
+    } finally {
+      htmx.off('htmx:sseConfigConnect', handler)
+    }
+  })
+
+  it('exposes hx-vals through the htmx:sseConfigConnect parameters detail', function() {
+    var capturedParameters = null
+    var handler = function(evt) {
+      capturedParameters = evt.detail.parameters
+    }
+    htmx.on('htmx:sseConfigConnect', handler)
+    try {
+      make('<div hx-ext="sse" sse-connect="/foo" hx-vals=\'{"a":"1","b":"2"}\'></div>')
+      this.clock.tick(1)
+
+      capturedParameters.a.should.equal('1')
+      capturedParameters.b.should.equal('2')
+    } finally {
+      htmx.off('htmx:sseConfigConnect', handler)
+    }
   })
 })

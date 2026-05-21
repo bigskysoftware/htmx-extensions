@@ -68,13 +68,58 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
 
   /**
    * createEventSource is the default method for creating new EventSource objects.
-   * it is hoisted into htmx.config.createEventSource to be overridden by the user, if needed.
+   * It is hoisted into htmx.createEventSource to be overridden by the user, if needed.
+   *
+   * The `options` argument is the object passed as the second parameter to the
+   * `EventSource` constructor.  The browser's built-in `EventSource` only reads
+   * the `withCredentials` flag from it, but EventSource polyfills (e.g. `sse.js`
+   * from https://github.com/mpetazzoni/sse.js) can support additional
+   * properties such as `method`, `headers`, `payload`, etc., which makes it
+   * possible to perform POST connections, send Authorization headers, and so
+   * on.  See the extension README for examples.
    *
    * @param {string} url
+   * @param {EventSourceInit & {headers?: Object, method?: string, payload?: any}} [options]
    * @returns EventSource
    */
-  function createEventSource(url) {
-    return new EventSource(url, { withCredentials: true })
+  function createEventSource(url, options) {
+    return new EventSource(url, options || { withCredentials: true })
+  }
+
+  /**
+   * appendValuesToUrl serializes `values` as URL query parameters and appends
+   * them to `url`, preserving any query string that may already be present.
+   *
+   * @param {string} url
+   * @param {Object} values
+   * @returns {string}
+   */
+  function appendValuesToUrl(url, values) {
+    if (!values) {
+      return url
+    }
+    var parts = []
+    for (var key in values) {
+      if (!Object.prototype.hasOwnProperty.call(values, key)) {
+        continue
+      }
+      var value = values[key]
+      if (value === null || value === undefined) {
+        continue
+      }
+      if (Array.isArray(value)) {
+        for (var i = 0; i < value.length; i++) {
+          parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value[i]))
+        }
+      } else {
+        parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value))
+      }
+    }
+    if (parts.length === 0) {
+      return url
+    }
+    var separator = url.indexOf('?') === -1 ? '?' : '&'
+    return url + separator + parts.join('&')
   }
 
   /**
@@ -194,7 +239,41 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
   }
 
   function ensureEventSource(elt, url, retryCount) {
-    var source = htmx.createEventSource(url)
+    // Collect any hx-vals / hx-vars (and inputs) declared on the element so
+    // that they can be sent along with the connection request. For standard
+    // EventSource these are appended as URL query parameters. For polyfilled
+    // EventSource implementations that support a body (e.g. sse.js), they are
+    // also exposed as `parameters` on the config event so user code can move
+    // them into the request payload if needed.
+    var expressionVars = api.getExpressionVars(elt) || {}
+    var headers = api.getHeaders(elt, api.getTarget(elt))
+
+    // Build the initial options object that will be passed to the EventSource
+    // constructor.  The standard EventSource only reads `withCredentials`, but
+    // polyfills like sse.js accept `method`, `headers`, `payload`, etc.
+    var options = { withCredentials: true }
+
+    // Append the gathered values to the URL by default.  Users can remove
+    // them in the htmx:sseConfigConnect handler if they want to send them
+    // through the body of a POST request instead.
+    var finalUrl = appendValuesToUrl(url, expressionVars)
+
+    var sseConfig = {
+      url: finalUrl,
+      options: options,
+      parameters: expressionVars,
+      headers: headers,
+      elt: elt
+    }
+
+    // Fire htmx:sseConfigConnect so user code can override the URL or the
+    // options object (e.g. set method/payload/headers for a polyfilled
+    // EventSource).  If the event is cancelled, abort the connection.
+    if (!api.triggerEvent(elt, 'htmx:sseConfigConnect', sseConfig)) {
+      return
+    }
+
+    var source = htmx.createEventSource(sseConfig.url, sseConfig.options)
 
     source.onerror = function(err) {
       // Log an error event

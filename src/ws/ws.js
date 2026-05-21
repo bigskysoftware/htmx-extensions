@@ -113,6 +113,26 @@ This extension adds support for WebSockets to htmx.  See /www/extensions/ws.md f
       }
     }
 
+    // Collect any hx-vals / hx-vars defined on the connecting element and
+    // append them as query string parameters to the WebSocket URL. This is
+    // useful for passing dynamic values (e.g. an auth token or a room id) to
+    // the WebSocket server, since the WebSocket constructor does not support
+    // custom headers or a body.
+    var expressionVars = api.getExpressionVars(socketElt) || {}
+    wssSource = appendValuesToUrl(wssSource, expressionVars)
+
+    // Fire htmx:wsConfigConnect so user code can override the URL before the
+    // WebSocket is opened.  If the event is cancelled, abort the connection.
+    var connectConfig = {
+      url: wssSource,
+      parameters: expressionVars,
+      elt: socketElt
+    }
+    if (!api.triggerEvent(socketElt, 'htmx:wsConfigConnect', connectConfig)) {
+      return
+    }
+    wssSource = connectConfig.url
+
     var socketWrapper = createWebsocketWrapper(socketElt, function() {
       return htmx.createWebSocket(wssSource)
     })
@@ -432,6 +452,42 @@ This extension adds support for WebSockets to htmx.  See /www/extensions/ws.md f
     var sock = new WebSocket(url, [])
     sock.binaryType = htmx.config.wsBinaryType
     return sock
+  }
+
+  /**
+   * appendValuesToUrl serializes `values` as URL query parameters and appends
+   * them to `url`, preserving any query string that may already be present.
+   *
+   * @param {string} url
+   * @param {Object} values
+   * @returns {string}
+   */
+  function appendValuesToUrl(url, values) {
+    if (!values) {
+      return url
+    }
+    var parts = []
+    for (var key in values) {
+      if (!Object.prototype.hasOwnProperty.call(values, key)) {
+        continue
+      }
+      var value = values[key]
+      if (value === null || value === undefined) {
+        continue
+      }
+      if (Array.isArray(value)) {
+        for (var i = 0; i < value.length; i++) {
+          parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value[i]))
+        }
+      } else {
+        parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value))
+      }
+    }
+    if (parts.length === 0) {
+      return url
+    }
+    var separator = url.indexOf('?') === -1 ? '?' : '&'
+    return url + separator + parts.join('&')
   }
 
   /**
