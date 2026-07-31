@@ -786,6 +786,51 @@ describe('sse extension', function() {
     byId('d1').innerHTML.should.equal('Event 1')
   })
 
+  it('does not register duplicate listeners when the element is processed again', function() {
+    // the same element owns the connection and is a swap target
+    var div = make('<div id="d1" hx-ext="sse" sse-connect="/foo" sse-swap="e1">initial</div>')
+    this.clock.tick(1)
+
+    var first = this.eventSource
+    var messageCount = 0
+    div.addEventListener('htmx:sseMessage', function() {
+      messageCount++
+    })
+
+    div.setAttribute('data-morphed', 'true')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    first._listeners.e1.should.be.lengthOf(1)
+
+    this.eventSource.sendEvent('e1', 'Event 1')
+    messageCount.should.equal(1)
+    byId('d1').innerHTML.should.equal('Event 1')
+  })
+
+  it('does not register duplicate listeners when a child is processed again', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" sse-swap="e1">initial</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    var first = this.eventSource
+    var messageCount = 0
+    div.addEventListener('htmx:sseMessage', function() {
+      messageCount++
+    })
+
+    byId('d1').setAttribute('data-morphed', 'true')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    first._listeners.e1.should.be.lengthOf(1)
+
+    this.eventSource.sendEvent('e1', 'Event 1')
+    messageCount.should.equal(1)
+    byId('d1').innerHTML.should.equal('Event 1')
+  })
+
   it('does not register duplicate listeners when children are processed again with a new EventSource', function() {
     var div = make('<div hx-ext="sse" sse-connect="/foo">' +
       '<div id="d1" sse-swap="e1">init</div>' +

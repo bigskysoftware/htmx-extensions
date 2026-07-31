@@ -22,6 +22,18 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
    */
   var sseSources = new WeakMap()
 
+  /**
+   * sseListeners keeps the listeners that were registered for an element, so that they
+   * can be removed before the element is registered again.
+   *
+   * This is needed for the same reason as sseSources: htmx wipes an element's internal
+   * data before it re-fires htmx:afterProcessNode, so sseEventListener no longer refers
+   * to what was registered earlier, and the element would end up listening twice.
+   *
+   * @type {WeakMap<HTMLElement, Array<{source: EventSource, name: string, listener: Function}>>}
+   */
+  var sseListeners = new WeakMap()
+
   htmx.defineExtension('sse', {
 
     /**
@@ -90,6 +102,10 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
    * @param {HTMLElement} elt
    */
   function registerSSE(elt) {
+    // Drop what this element registered earlier, so that processing it again does not
+    // leave it listening for the same event twice
+    removeSSEListeners(elt)
+
     // Add message handlers for every `sse-swap` attribute
     if (api.getAttributeValue(elt, 'sse-swap')) {
       // Find closest existing event source
@@ -130,8 +146,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
 
         // Register the new listener
         api.getInternalData(elt).sseEventListener = listener
-        api.getInternalData(elt).sseEventListenerSource = source
-        source.addEventListener(sseEventName, listener)
+        addSSEListener(elt, source, sseEventName, listener)
       }
     }
 
@@ -168,8 +183,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
 
         // Register the new listener
         api.getInternalData(elt).sseEventListener = listener
-        api.getInternalData(elt).sseEventListenerSource = source
-        source.addEventListener(ts.trigger.slice(4), listener)
+        addSSEListener(elt, source, ts.trigger.slice(4), listener)
       })
     }
   }
@@ -259,10 +273,7 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       if (replacedSource || (retryCount && retryCount > 0)) {
         const childrenToFix = elt.querySelectorAll("[sse-swap], [data-sse-swap], [hx-trigger], [data-hx-trigger]")
         for (let i = 0; i < childrenToFix.length; i++) {
-          // children processed after this source was created listen on it already
-          if (api.getInternalData(childrenToFix[i]).sseEventListenerSource !== source) {
-            registerSSE(childrenToFix[i])
-          }
+          registerSSE(childrenToFix[i])
         }
         replacedSource = false
         // We want to increase the reconnection delay for consecutive failed attempts only
@@ -297,6 +308,43 @@ This extension adds support for Server Sent Events to htmx.  See /www/extensions
       return closeEventSource(elt, 'nodeMissing')
     }
     return false
+  }
+
+  /**
+   * addSSEListener starts listening for an event on the given source, and keeps track
+   * of the listener so that it can be removed again.
+   *
+   * @param {HTMLElement} elt
+   * @param {EventSource} source
+   * @param {string} name
+   * @param {Function} listener
+   */
+  function addSSEListener(elt, source, name, listener) {
+    var listeners = sseListeners.get(elt)
+    if (!listeners) {
+      listeners = []
+      sseListeners.set(elt, listeners)
+    }
+
+    listeners.push({ source, name, listener })
+    source.addEventListener(name, listener)
+  }
+
+  /**
+   * removeSSEListeners stops listening for every event this element was registered for.
+   *
+   * @param {HTMLElement} elt
+   */
+  function removeSSEListeners(elt) {
+    var listeners = sseListeners.get(elt)
+    if (!listeners) {
+      return
+    }
+
+    for (var i = 0; i < listeners.length; i++) {
+      listeners[i].source.removeEventListener(listeners[i].name, listeners[i].listener)
+    }
+    sseListeners.delete(elt)
   }
 
   /**
