@@ -915,4 +915,35 @@ describe('sse extension', function() {
     this.eventSource.sendEvent('e1', 'Event 1')
     byId('d1').innerHTML.should.equal('Event 1')
   })
+
+  it('does not stack listeners on a nested EventSource when the outer one reconnects', function() {
+    make('<div hx-ext="sse" sse-connect="/outer">' +
+      '<div sse-connect="/inner">' +
+      '<div id="d1" sse-swap="e1">init</div>' +
+      '</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    var outer = this.eventSources[0]
+    var inner = this.eventSources[1]
+    inner.url.should.equal('/inner')
+    inner._listeners.e1.should.be.lengthOf(1)
+
+    var messageCount = 0
+    byId('d1').addEventListener('htmx:sseMessage', function() {
+      messageCount++
+    })
+
+    // the outer stream drops and reconnects; the nested one never dropped
+    outer.simulateConnectionError()
+    this.clock.tick(500)
+    this.clock.tick(1)
+
+    inner.readyState.should.equal(EventSource.OPEN)
+    inner._listeners.e1.should.be.lengthOf(1)
+
+    inner.sendEvent('e1', 'Event 1')
+    messageCount.should.equal(1)
+    byId('d1').innerHTML.should.equal('Event 1')
+  })
 })
