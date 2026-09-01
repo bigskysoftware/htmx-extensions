@@ -66,9 +66,11 @@ describe('sse extension', function() {
     this.clock = sinon.useFakeTimers();
     var test = this
     clearWorkArea()
+    this.eventSources = []
     htmx.createEventSource = function(url) {
       var eventSource = mockEventSource()
       test.eventSource = eventSource
+      test.eventSources.push(eventSource)
       eventSource.connect(url)
       return eventSource
     }
@@ -701,5 +703,247 @@ describe('sse extension', function() {
     this.server.respond()
     byId('d1').innerHTML.should.equal('div1 updated')
     byId('d2').innerHTML.should.equal('div2 updated')
+  })
+
+  // htmx fires htmx:afterProcessNode again whenever an element's attributes change,
+  // which is what a morph style swap does, so the extension has to cope with being
+  // asked to connect an element that is already connected.
+  it('reuses the existing EventSource when the element is processed again', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" sse-swap="e1">init</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    var first = this.eventSource
+
+    div.setAttribute('data-morphed', 'true')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    this.eventSources.should.be.lengthOf(1)
+    this.eventSource.should.equal(first)
+    first.readyState.should.equal(EventSource.OPEN)
+    div['htmx-internal-data'].sseEventSource.should.equal(first)
+  })
+
+  it('keeps children bound to the reused EventSource', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" sse-swap="e1">init</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    var first = this.eventSource
+
+    div.setAttribute('data-morphed', 'true')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    first._listeners.e1.should.be.lengthOf(1)
+
+    this.eventSource.sendEvent('e1', 'Event 1')
+    byId('d1').innerHTML.should.equal('Event 1')
+  })
+
+  it('does not raise htmx:sseClose when the connection is reused', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/foo"></div>')
+    this.clock.tick(1)
+
+    var closeCalled = false
+    htmx.on(div, 'htmx:sseClose', function() {
+      closeCalled = true
+    })
+
+    div.setAttribute('data-morphed', 'true')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    closeCalled.should.equal(false)
+  })
+
+  it('replaces the EventSource when sse-connect changes', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" sse-swap="e1">init</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    var first = this.eventSource
+    var test = this
+    htmx.on(div, 'htmx:sseClose', function(evt) {
+      test.closeType = evt.detail.type
+    })
+
+    div.setAttribute('sse-connect', '/bar')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    first.readyState.should.equal(EventSource.CLOSED)
+    this.closeType.should.equal('sourceReplaced')
+    this.eventSource.should.not.equal(first)
+    this.eventSource.url.should.equal('/bar')
+    this.eventSource._listeners.e1.should.be.lengthOf(1)
+
+    this.eventSource.sendEvent('e1', 'Event 1')
+    byId('d1').innerHTML.should.equal('Event 1')
+  })
+
+  it('does not register duplicate listeners when the element is processed again', function() {
+    // the same element owns the connection and is a swap target
+    var div = make('<div id="d1" hx-ext="sse" sse-connect="/foo" sse-swap="e1">initial</div>')
+    this.clock.tick(1)
+
+    var first = this.eventSource
+    var messageCount = 0
+    div.addEventListener('htmx:sseMessage', function() {
+      messageCount++
+    })
+
+    div.setAttribute('data-morphed', 'true')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    first._listeners.e1.should.be.lengthOf(1)
+
+    this.eventSource.sendEvent('e1', 'Event 1')
+    messageCount.should.equal(1)
+    byId('d1').innerHTML.should.equal('Event 1')
+  })
+
+  it('does not register duplicate listeners when a child is processed again', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" sse-swap="e1">initial</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    var first = this.eventSource
+    var messageCount = 0
+    div.addEventListener('htmx:sseMessage', function() {
+      messageCount++
+    })
+
+    byId('d1').setAttribute('data-morphed', 'true')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    first._listeners.e1.should.be.lengthOf(1)
+
+    this.eventSource.sendEvent('e1', 'Event 1')
+    messageCount.should.equal(1)
+    byId('d1').innerHTML.should.equal('Event 1')
+  })
+
+  it('does not register duplicate listeners when children are processed again with a new EventSource', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" sse-swap="e1">init</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    var messageCount = 0
+    div.addEventListener('htmx:sseMessage', function() {
+      messageCount++
+    })
+
+    div.setAttribute('sse-connect', '/bar')
+    byId('d1').setAttribute('data-morphed', 'true')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    this.eventSource._listeners.e1.should.be.lengthOf(1)
+
+    this.eventSource.sendEvent('e1', 'Event 1')
+    messageCount.should.equal(1)
+  })
+
+  it('closes the EventSource when sse-connect is removed', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/foo"></div>')
+    this.clock.tick(1)
+
+    var first = this.eventSource
+    var test = this
+    htmx.on(div, 'htmx:sseClose', function(evt) {
+      test.closeType = evt.detail.type
+    })
+
+    div.removeAttribute('sse-connect')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    first.readyState.should.equal(EventSource.CLOSED)
+    this.closeType.should.equal('sourceReplaced')
+    this.eventSources.should.be.lengthOf(1)
+  })
+
+  it('does not open a duplicate EventSource when processed while a reconnect is pending', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/foo">' +
+      '<div id="d1" sse-swap="e1">init</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    this.eventSource.simulateConnectionError()
+
+    div.setAttribute('data-morphed', 'true')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    // the retry scheduled by the connection error must find the fresh connection
+    this.clock.tick(500)
+
+    this.eventSources.should.be.lengthOf(2)
+    this.eventSource._listeners.e1.should.be.lengthOf(1)
+
+    this.eventSource.sendEvent('e1', 'Event 1')
+    byId('d1').innerHTML.should.equal('Event 1')
+  })
+
+  it('opens a new EventSource after the connection was closed', function() {
+    var div = make('<div hx-ext="sse" sse-connect="/foo" sse-close="close">' +
+      '<div id="d1" sse-swap="e1">init</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    var first = this.eventSource
+    first.sendEvent('close')
+    first.readyState.should.equal(EventSource.CLOSED)
+
+    div.setAttribute('data-morphed', 'true')
+    htmx.process(div)
+    this.clock.tick(1)
+
+    this.eventSources.should.be.lengthOf(2)
+    this.eventSource.should.not.equal(first)
+    this.eventSource._listeners.e1.should.be.lengthOf(1)
+
+    this.eventSource.sendEvent('e1', 'Event 1')
+    byId('d1').innerHTML.should.equal('Event 1')
+  })
+
+  it('does not stack listeners on a nested EventSource when the outer one reconnects', function() {
+    make('<div hx-ext="sse" sse-connect="/outer">' +
+      '<div sse-connect="/inner">' +
+      '<div id="d1" sse-swap="e1">init</div>' +
+      '</div>' +
+      '</div>')
+    this.clock.tick(1)
+
+    var outer = this.eventSources[0]
+    var inner = this.eventSources[1]
+    inner.url.should.equal('/inner')
+    inner._listeners.e1.should.be.lengthOf(1)
+
+    var messageCount = 0
+    byId('d1').addEventListener('htmx:sseMessage', function() {
+      messageCount++
+    })
+
+    // the outer stream drops and reconnects; the nested one never dropped
+    outer.simulateConnectionError()
+    this.clock.tick(500)
+    this.clock.tick(1)
+
+    inner.readyState.should.equal(EventSource.OPEN)
+    inner._listeners.e1.should.be.lengthOf(1)
+
+    inner.sendEvent('e1', 'Event 1')
+    messageCount.should.equal(1)
+    byId('d1').innerHTML.should.equal('Event 1')
   })
 })
