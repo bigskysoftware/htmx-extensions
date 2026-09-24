@@ -182,6 +182,25 @@ describe('json-enc extension', function() {
     form.innerHTML.should.equal('OK')
   })
 
+  it('keeps hx-vals keys whose value serializes to nothing in FormData', function() {
+    var values = {}
+    this.server.respondWith('POST', '/test', function(xhr) {
+      values = JSON.parse(xhr.requestBody)
+      xhr.respond(200, {}, 'clicked')
+    })
+
+    make(`<form hx-ext="json-enc" hx-post="/test" hx-vals="js:{'firstLevel': [], 'secondLevel': {'values': []}}">
+             <button id="btn" type="submit">Submit</button>
+          </form>`)
+    var btn = byId('btn')
+    btn.click()
+    this.server.respond()
+
+    values.should.have.keys('firstLevel', 'secondLevel')
+    chai.assert.deepEqual(values.firstLevel, [])
+    chai.assert.deepEqual(values.secondLevel, { values: [] })
+  })
+
   it('handles multiple select', function() {
     this.server.respondWith('POST', '/test', function(xhr) {
       var values = JSON.parse(xhr.requestBody)
